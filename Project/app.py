@@ -1,13 +1,15 @@
 import sys
-
+import random
 from PySide6.QtCore import QSize
-from PySide6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QDialog, QMessageBox, QInputDialog
+from PySide6.QtWidgets import (QApplication, QMainWindow, QTableWidgetItem,
+                               QWidget, QDialog, QMessageBox, QInputDialog, QPushButton)
 from PySide6.QtGui import QIcon, Qt
 from ui_menu import Ui_MainWindow
 from ui_table import Ui_TableWindow
 from ui_payment import Ui_PaymentWindow
 from db_manager import DBManager
 from cart import Cart
+from datetime import datetime
 
 class POS_system(QMainWindow):
     def __init__(self):
@@ -18,6 +20,7 @@ class POS_system(QMainWindow):
         self.cart = Cart()
 
         self.ui.pbtn_search.clicked.connect(self.search_menu)
+        self.generate_order_id()
 
         # category actions
         self.steak_btns = [self.ui.btn_steak_garlic, self.ui.btn_steak_porkchop, self.ui.btn_steak_teriyaki,
@@ -196,6 +199,7 @@ class POS_system(QMainWindow):
         #order
         self.ui.order.cellClicked.connect(self.manage_cart_item)
         self.ui.pbtn_clear.clicked.connect(self.clear_all_order)
+        self.ui.pbtn_save.clicked.connect(self.save_current_order)
 
         #connection to others pages
         self.ui.pbtn_table.clicked.connect(self.open_table_window)
@@ -261,6 +265,12 @@ class POS_system(QMainWindow):
             if len(buttons_to_show) == 0:
                 QMessageBox.warning(self, "ผลการค้นหา", f"ไม่พบเมนูที่มีคำว่า '{search_text}'")
 
+    def generate_order_id(self):
+        now = datetime.now()
+        order_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
+        self.current_order_id = order_no
+        self.ui.lbl_order_id.setText(f"{order_no}")
+        self.ui.lbl_order_id.setStyleSheet("color: white; font-size: 14px; font-weight: bold;")
     def add_to_cart(self, item_id, name, price):
         self.cart.add_item(item_id, name, price, qty=1)
         self.update_ui()
@@ -329,6 +339,40 @@ class POS_system(QMainWindow):
             self.cart.remove_item(item_id)
             self.update_ui()
 
+    def save_current_order(self):
+        items = self.cart.get_all_items()
+
+        if len(items) == 0:
+            QMessageBox.warning(self, "แจ้งเตือน", "ยังไม่มีรายการอาหารในบิลนี้")
+            return
+        if not hasattr(self, "current_table"):
+            QMessageBox.warning(self, "แจ้งเตือน", "กรุณาเลือกโต๊ะก่อนทำรายการ")
+            return
+
+        table_no = self.current_table
+        cust_no = getattr(self, 'current_customers', 1)
+        total = self.cart.get_total_price()
+
+        confirm = QMessageBox.question(
+            self, "ยืนยันการบันทึก",
+            f"ต้องการบันทึกออเดอร์ โต๊ะที่ {table_no} ยอดรวม {total:,.2f} บาท ใช่หรือไม่?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if confirm == QMessageBox.StandardButton.Yes:
+            success = self.db.save_order(table_no, cust_no, total, items, status="unpaid")
+
+            if success:
+                QMessageBox.information(self, "สำเร็จ", "บันทึกรายการอาหารเรียบร้อยแล้ว!")
+
+                self.cart.clear_cart()
+                self.update_ui()
+                self.ui.lbl_current_table.setText("")
+
+                if hasattr(self, 'current_table'):
+                    del self.current_table
+                if hasattr(self, 'current_customers'):
+                    del self.current_customers
     def clear_all_order(self):
         if len(self.cart.get_all_items()) == 0:
             return
@@ -341,8 +385,8 @@ class POS_system(QMainWindow):
         if clr_msg.exec() == QMessageBox.StandardButton.Yes:
             self.cart.clear_cart()
             self.update_ui()
-
             self.ui.lbl_current_table.setText("")
+            self.generate_order_id()
 
             if hasattr(self, 'current_table'):
                 del self.current_table
@@ -407,7 +451,11 @@ class POS_system(QMainWindow):
 
         if not cust_qty_str or int(cust_qty_str) <= 0 or int(cust_qty_str) > 10:
             #show error box
-            QMessageBox.Critical(self, "โปรดกรอกจำนวนลูกค้าให้ถูกต้อง", "Error!")
+            err_msg = QMessageBox()
+            err_msg.setIcon(QMessageBox.Critical)
+            err_msg.setText("โปรดกรอกจำนวนลูกค้าให้ถูกต้อง")
+            err_msg.setWindowTitle("Error!")
+            err_msg.exec()
             return
 
         if not hasattr(self, "current_table"):
@@ -434,15 +482,64 @@ class POS_system(QMainWindow):
             self.table_window.close()
 
     def open_payment_window(self):
-        if len(self.cart.get_all_items()) == 0:
-            print("error")
+        items = self.cart.get_all_items()
+
+        if len(items) == 0:
+            QMessageBox.warning(self, "แจ้งเตือน", "ยังไม่มีรายการอาหารในบิลนี้")
             return
-        self.payment_window = QDialog()
+        if not hasattr(self, "current_table"):
+            QMessageBox.warning(self, "แจ้งเตือน", "กรุณาเลือกโต๊ะก่อนทำรายการ")
+            return
+
+        self.payment_window = QDialog(self)
         self.ui_payment = Ui_PaymentWindow()
         self.ui_payment.setupUi(self.payment_window)
-        total = self.cart.get_total_price()
-        self.ui_payment.label_total.setText(f"{total:,.2f}")
+
+        self.ui_payment.table_order.setRowCount(len(items))
+        for row_index, item in enumerate(items):
+            self.ui_payment.table_order.setItem(row_index, 0, QTableWidgetItem(item["name"]))
+            self.ui_payment.table_order.setItem(row_index, 1, QTableWidgetItem(str(item["qty"])))
+            total_price = item["price"] * item["qty"]
+            self.ui_payment.table_order.setItem(row_index, 2, QTableWidgetItem(f"{total_price:,.2f}"))
+
+        subtotal = self.cart.get_total_price()
+        discount = 0.00
+        vat = subtotal * 0.07
+        net_total = subtotal + vat - discount
+
+        self.ui_payment.table_summary.setColumnCount(1)
+        self.ui_payment.table_summary.horizontalHeader().setVisible(False)
+        self.ui_payment.table_summary.setItem(0, 0, QTableWidgetItem(f"{discount:,.2f}"))
+        self.ui_payment.table_summary.setItem(1, 0, QTableWidgetItem(f"{vat:,.2f}"))
+        self.ui_payment.table_summary.setItem(2, 0, QTableWidgetItem(f"{net_total:,.2f}"))
+
+        self.ui_payment.label_total.setText(f"{net_total:,.2f}")
+
+        self.ui_payment.pbtn_back.clicked.connect(self.payment_window.close)
+        self.btn_confirm_pay.clicked.connect(lambda: self.confirm_payment(net_total))
+
         self.payment_window.exec()
+
+    def confirm_payment(self, net_total):
+        table_no = self.current_table
+        cust_no = getattr(self, "current_customers", 1)
+        cart_items = self.cart.get_all_items()
+
+        success = self.db.save_order(table_no, cust_no, net_total, cart_items, status = "paid")
+
+        if success:
+            word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ", "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
+            QMessageBox.information(self.payment_window, "ชำระเงินสำเร็จ", f"{random.choice(word)}")
+
+            self.payment_window.close()
+            self.cart.clear_cart()
+            self.update_ui()
+            self.ui.lbl_current_table.setText("")
+
+            if hasattr(self, "current_table"):
+                del self.current_table
+            if hasattr(self, "current_customers"):
+                del self.current_customers
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
