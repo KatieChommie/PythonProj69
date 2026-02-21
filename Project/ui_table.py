@@ -418,7 +418,7 @@ class Ui_TableWindow(object):
         self.tbtn_table8.setText(QCoreApplication.translate("Form", u"8", None))
         self.lbl_table_header.setText(QCoreApplication.translate("Form", u"\u0e20\u0e32\u0e22\u0e43\u0e19 \u0e42\u0e15\u0e4a\u0e30\u0e17\u0e35\u0e48 1", None))
         self.label.setText(QCoreApplication.translate("Form", u"\u0e08\u0e33\u0e19\u0e27\u0e19\u0e25\u0e39\u0e01\u0e04\u0e49\u0e32", None))
-        self.lineEdit.setText(QCoreApplication.translate("Form", u"2", None))
+        self.lineEdit.setText(QCoreApplication.translate("Form", u"", None))
         self.num6.setText(QCoreApplication.translate("Form", u"6", None))
         self.num5.setText(QCoreApplication.translate("Form", u"5", None))
         self.num0.setText(QCoreApplication.translate("Form", u"0", None))

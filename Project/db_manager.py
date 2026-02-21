@@ -53,5 +53,37 @@ class DBManager:
                 return True
 
         except Exception as e:
-            print("Error")
+            print(f"Database Error: {e}")
             return False
+
+    def get_unpaid_order(self, table_no):
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute(
+                    'SELECT "id" FROM "orders" WHERE "table_no" = ? AND "status" = "unpaid" ORDER BY "id" DESC LIMIT 1',
+                    (str(table_no),))
+
+                order = cursor.fetchone()
+                if order:
+                    order_id = order["id"]
+                    cursor.execute("SELECT menu_order, qty, price FROM order_item WHERE order_id = ?",
+                        (order_id,))
+                    items = cursor.fetchall()
+                    return {"order_id": order_id, "items": [dict(i) for i in items]}
+                return None
+        except Exception as e:
+            print(f"Error fetching unpaid order: {e}")
+            return None
+
+    def update_order_status(self, order_id, status="paid"):
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE "orders" SET "status" = ? WHERE "id" = ?', (status, order_id))
+                return True
+        except Exception as e:
+            print(f"Error updating status: {e}")
+            return False
+

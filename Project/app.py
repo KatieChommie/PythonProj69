@@ -1,5 +1,4 @@
 import sys
-import random
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableWidgetItem,
                                QWidget, QDialog, QMessageBox, QInputDialog, QPushButton)
@@ -388,6 +387,8 @@ class POS_system(QMainWindow):
             self.ui.lbl_current_table.setText("")
             self.generate_order_id()
 
+            if hasattr(self, 'current_db_order_id'):
+                del self.current_db_order_id
             if hasattr(self, 'current_table'):
                 del self.current_table
             if hasattr(self, 'current_customers'):
@@ -480,7 +481,28 @@ class POS_system(QMainWindow):
             self.ui.lbl_current_table.setText(f"โต๊ะที่ {self.current_table}\nลูกค้า {cust_qty_str} ท่าน")
             self.table_window.close()
             self.table_window.close()
+            self.load_unpaid_order()
 
+    # ui_payment page
+    def load_unpaid_order(self):
+        if not hasattr(self, "current_table"):
+            return
+        order_data = self.db.get_unpaid_order(self.current_table)
+
+        if order_data:
+            self.current_db_order_id = order_data["order_id"]
+            self.cart.clear_cart()
+            for item in order_data["items"]:
+                self.cart.add_item(item["menu_order"], item["menu_order"], item['price'], item['qty'])
+
+            self.update_ui()
+            QMessageBox.information(self, "ดึงบิลที่ยังไม่จ่ายสำเร็จ", f"ดึงรายการค้างจ่ายของโต๊ะ {self.current_table} กลับมาแล้ว")
+        else:
+            if hasattr(self, "current_db_order_id"):
+                del self.current_order_id
+            self.cart.clear_cart()
+            self.update_ui()
+            QMessageBox.information(self, "Cleared!", f"โต๊ะ {self.current_table} ว่างแล้ว พร้อมรับออเดอร์ใหม่")
     def open_payment_window(self):
         items = self.cart.get_all_items()
 
@@ -507,15 +529,20 @@ class POS_system(QMainWindow):
         vat = subtotal * 0.07
         net_total = subtotal + vat - discount
 
+        self.btn_confirm_pay = QPushButton("ยืนยันการรับเงิน")
+        self.btn_confirm_pay.setMinimumHeight(60)
+        self.btn_confirm_pay.setStyleSheet(
+        "background-color: #079757; color: white; font-size: 20px; font-weight: bold; border-radius: 10px;")
+
         self.ui_payment.table_summary.setColumnCount(1)
         self.ui_payment.table_summary.horizontalHeader().setVisible(False)
         self.ui_payment.table_summary.setItem(0, 0, QTableWidgetItem(f"{discount:,.2f}"))
         self.ui_payment.table_summary.setItem(1, 0, QTableWidgetItem(f"{vat:,.2f}"))
         self.ui_payment.table_summary.setItem(2, 0, QTableWidgetItem(f"{net_total:,.2f}"))
-
+        self.ui_payment.verticalLayout_2.insertWidget(2, self.btn_confirm_pay)
         self.ui_payment.label_total.setText(f"{net_total:,.2f}")
-
         self.ui_payment.pbtn_back.clicked.connect(self.payment_window.close)
+
         self.btn_confirm_pay.clicked.connect(lambda: self.confirm_payment(net_total))
 
         self.payment_window.exec()
@@ -525,9 +552,13 @@ class POS_system(QMainWindow):
         cust_no = getattr(self, "current_customers", 1)
         cart_items = self.cart.get_all_items()
 
-        success = self.db.save_order(table_no, cust_no, net_total, cart_items, status = "paid")
+        if hasattr(self, "current_db_order_id"):
+            success = self.db.update_order_status(self.current_db_order_id, status="paid")
+        else:
+            success = self.db.save_order(table_no, cust_no, net_total, cart_items, status="paid")
 
         if success:
+            import random
             word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ", "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
             QMessageBox.information(self.payment_window, "ชำระเงินสำเร็จ", f"{random.choice(word)}")
 
@@ -536,6 +567,8 @@ class POS_system(QMainWindow):
             self.update_ui()
             self.ui.lbl_current_table.setText("")
 
+            if hasattr(self, "current_db_order_id"):
+                del self.current_db_order_id
             if hasattr(self, "current_table"):
                 del self.current_table
             if hasattr(self, "current_customers"):
