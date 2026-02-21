@@ -499,7 +499,7 @@ class POS_system(QMainWindow):
             QMessageBox.information(self, "ดึงบิลที่ยังไม่จ่ายสำเร็จ", f"ดึงรายการค้างจ่ายของโต๊ะ {self.current_table} กลับมาแล้ว")
         else:
             if hasattr(self, "current_db_order_id"):
-                del self.current_order_id
+                del self.current_db_order_id
             self.cart.clear_cart()
             self.update_ui()
             QMessageBox.information(self, "Cleared!", f"โต๊ะ {self.current_table} ว่างแล้ว พร้อมรับออเดอร์ใหม่")
