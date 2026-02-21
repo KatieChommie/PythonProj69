@@ -502,6 +502,8 @@ class Ui_MainWindow(object):
         self.order.setSelectionBehavior(QAbstractItemView.SelectItems)
         self.order.horizontalHeader().setVisible(True)
         self.order.verticalHeader().setVisible(False)
+        self.order.setColumnWidth(0, 150)
+        self.order.setColumnWidth(1, 50)
 
         self.verticalLayout_2.addWidget(self.order)
 
@@ -519,12 +521,31 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addWidget(self.lbl_total, 0, Qt.AlignRight)
 
+
         self.summary = QFrame(self.widget_right)
         self.summary.setObjectName(u"summary")
         self.summary.setFrameShape(QFrame.StyledPanel)
         self.summary.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_5 = QHBoxLayout(self.summary)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+
+        ###
+        self.pbtn_clear = QPushButton(self.summary)
+        self.pbtn_clear.setObjectName(u"pbtn_clear")
+        self.pbtn_clear.setMinimumSize(QSize(50, 50))
+        self.pbtn_clear.setMaximumSize(QSize(120, 120))
+        font6 = QFont()
+        font6.setPointSize(16)
+        font6.setBold(True)
+        self.pbtn_clear.setFont(font6)
+        self.pbtn_clear.setStyleSheet(u"QPushButton {\n"
+                                      "background-color: #FF717D;\n"
+                                      "border: 1px solid #FF717D;\n"
+                                      "}")
+
+        self.horizontalLayout_5.addWidget(self.pbtn_clear)
+        ###
+
         self.pbtn_save = QPushButton(self.summary)
         self.pbtn_save.setObjectName(u"pbtn_save")
         self.pbtn_save.setMinimumSize(QSize(50, 50))
@@ -626,6 +647,7 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem2 = self.order.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"\u0e22\u0e2d\u0e14\u0e23\u0e27\u0e21 (\u0e1a\u0e32\u0e17)", None));
         self.lbl_total.setText(QCoreApplication.translate("MainWindow", u"0.00", None))
+        self.pbtn_clear.setText(QCoreApplication.translate("MainMenu", u"Clear", None))
         self.pbtn_save.setText(QCoreApplication.translate("MainWindow", u"\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01", None))
         self.pbtn_pay.setText(QCoreApplication.translate("MainWindow", u"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23", None))
     # retranslateUi

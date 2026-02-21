@@ -1,8 +1,8 @@
 import sys
 
 from PySide6.QtCore import QSize
-from PySide6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QDialog, QMessageBox
-from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QDialog, QMessageBox, QInputDialog
+from PySide6.QtGui import QIcon, Qt
 from ui_menu import Ui_MainWindow
 from ui_table import Ui_TableWindow
 from ui_payment import Ui_PaymentWindow
@@ -17,80 +17,13 @@ class POS_system(QMainWindow):
         self.db = DBManager("D:/code/python/forproj2026/menu.db")
         self.cart = Cart()
 
-        #image-steak
-        self.ui.btn_steak_garlic.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_garlic.jpg"))
-        self.ui.btn_steak_garlic.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_pepper.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_pepper.jpg"))
-        self.ui.btn_steak_pepper.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_porkchop.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_porkchop.jpeg"))
-        self.ui.btn_steak_porkchop.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_spicy.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_spicy.jpg"))
-        self.ui.btn_steak_spicy.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_teriyaki.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_teriyaki.jpg"))
-        self.ui.btn_steak_teriyaki.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_hamcheese.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_hamcheese.jpg"))
-        self.ui.btn_steak_hamcheese.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_grillfish.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_grillfish.jpeg"))
-        self.ui.btn_steak_grillfish.setIconSize(QSize(110, 100))
-        self.ui.btn_steak_friedfish.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_friedfish.jpg"))
-        self.ui.btn_steak_friedfish.setIconSize(QSize(110, 100))
-        #image-burger
-        self.ui.btn_burger_bacon.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_bacon.jpg"))
-        self.ui.btn_burger_bacon.setIconSize(QSize(110, 100))
-        self.ui.btn_burger_spicy.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_spicy.jpeg"))
-        self.ui.btn_burger_spicy.setIconSize(QSize(110, 100))
-        self.ui.btn_burger_fish.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_fish.jpg"))
-        self.ui.btn_burger_fish.setIconSize(QSize(110, 100))
-        self.ui.btn_burger_teriyaki.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_teriyaki.jpg"))
-        self.ui.btn_burger_teriyaki.setIconSize(QSize(110, 100))
-        #image-spaghetti
-        self.ui.btn_spaghetti_drunk.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spaghetti_drunk.jpg"))
-        self.ui.btn_spaghetti_drunk.setIconSize(QSize(110, 100))
-        self.ui.btn_spaghetti_carbonara.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spaghetti_carbonara.jpg"))
-        self.ui.btn_spaghetti_carbonara.setIconSize(QSize(110, 100))
-        self.ui.btn_spaghetti_tomyum.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spaghetti_tomyum.jpg"))
-        self.ui.btn_spaghetti_tomyum.setIconSize(QSize(110, 100))
-        #image-salad
-        self.ui.btn_salad_tuna.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/salad_tuna.png"))
-        self.ui.btn_salad_tuna.setIconSize(QSize(110, 100))
-        self.ui.btn_salad_apple.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/salad_apple.jpg"))
-        self.ui.btn_salad_apple.setIconSize(QSize(110, 100))
-        self.ui.btn_salad_vegetable.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/salad_vegetable.jpg"))
-        self.ui.btn_salad_vegetable.setIconSize(QSize(110, 100))
-        #image-snacks
-        self.ui.btn_frenchfries.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/frenchfries.jpg"))
-        self.ui.btn_frenchfries.setIconSize(QSize(110, 100))
-        self.ui.btn_bread.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/bread.jpg"))
-        self.ui.btn_bread.setIconSize(QSize(110, 100))
-        self.ui.btn_potatoes.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/potatoes.jpg"))
-        self.ui.btn_potatoes.setIconSize(QSize(110, 100))
-        self.ui.btn_onion.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/onion.jpg"))
-        self.ui.btn_onion.setIconSize(QSize(110, 100))
-        self.ui.btn_spinach.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spinach.jpg"))
-        self.ui.btn_spinach.setIconSize(QSize(110, 100))
-        #image-drinks
-        self.ui.btn_coke_glass.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/coke_glass.jpeg"))
-        self.ui.btn_coke_glass.setIconSize(QSize(110, 100))
-        self.ui.btn_coke_jug.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/coke_jug.jpeg"))
-        self.ui.btn_coke_jug.setIconSize(QSize(110, 100))
-        self.ui.btn_lemontea.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/lemontea.jpg"))
-        self.ui.btn_lemontea.setIconSize(QSize(110, 100))
-        self.ui.btn_bluehawaiian.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/bluehawaiian.png"))
-        self.ui.btn_bluehawaiian.setIconSize(QSize(110, 100))
-        self.ui.btn_redsoda.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/redsoda.jpg"))
-        self.ui.btn_redsoda.setIconSize(QSize(110, 100))
-        self.ui.btn_passionfruit.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/passionfruit.jpg"))
-        self.ui.btn_passionfruit.setIconSize(QSize(110, 100))
-        self.ui.btn_water.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/water.jpeg"))
-        self.ui.btn_water.setIconSize(QSize(110, 100))
-        self.ui.btn_ice.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/ice.jpg"))
-        self.ui.btn_ice.setIconSize(QSize(110, 100))
+        self.ui.pbtn_search.clicked.connect(self.search_menu)
 
-        #category actions
+        # category actions
         self.steak_btns = [self.ui.btn_steak_garlic, self.ui.btn_steak_porkchop, self.ui.btn_steak_teriyaki,
-            self.ui.btn_steak_spicy, self.ui.btn_steak_pepper, self.ui.btn_steak_hamcheese,
-            self.ui.btn_steak_grillfish, self.ui.btn_steak_friedfish
-        ]
+                           self.ui.btn_steak_spicy, self.ui.btn_steak_pepper, self.ui.btn_steak_hamcheese,
+                           self.ui.btn_steak_grillfish, self.ui.btn_steak_friedfish
+                           ]
         self.burger_btns = [
             self.ui.btn_burger_bacon, self.ui.btn_burger_spicy,
             self.ui.btn_burger_teriyaki, self.ui.btn_burger_fish
@@ -121,9 +54,148 @@ class POS_system(QMainWindow):
         self.ui.tbtn_cat_snack.clicked.connect(lambda: self.filter_category("snack"))
         self.ui.tbtn_cat_drink.clicked.connect(lambda: self.filter_category("drink"))
 
+        #image-steak
+        self.ui.btn_steak_garlic.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_garlic.jpg"))
+        self.ui.btn_steak_garlic.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_garlic, "menus", 101)
+        self.ui.btn_steak_pepper.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_pepper.jpg"))
+        self.ui.btn_steak_pepper.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_pepper, "menus", 102)
+        self.ui.btn_steak_porkchop.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_porkchop.jpeg"))
+        self.ui.btn_steak_porkchop.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_porkchop, "menus", 103)
+        self.ui.btn_steak_spicy.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_spicy.jpg"))
+        self.ui.btn_steak_spicy.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_spicy, "menus", 104)
+        self.ui.btn_steak_teriyaki.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_teriyaki.jpg"))
+        self.ui.btn_steak_teriyaki.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_teriyaki, "menus", 108)
+        self.ui.btn_steak_hamcheese.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_hamcheese.jpg"))
+        self.ui.btn_steak_hamcheese.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_hamcheese, "menus", 105)
+        self.ui.btn_steak_grillfish.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_grillfish.jpeg"))
+        self.ui.btn_steak_grillfish.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_grillfish, "menus", 106)
+        self.ui.btn_steak_friedfish.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/steak_friedfish.jpg"))
+        self.ui.btn_steak_friedfish.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_steak_friedfish, "menus", 107)
+        #image-burger
+        self.ui.btn_burger_bacon.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_bacon.jpg"))
+        self.ui.btn_burger_bacon.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_burger_bacon, "burger", 201)
+        self.ui.btn_burger_spicy.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_spicy.jpeg"))
+        self.ui.btn_burger_spicy.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_burger_spicy, "burger", 202)
+        self.ui.btn_burger_fish.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_fish.jpg"))
+        self.ui.btn_burger_fish.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_burger_fish, "burger", 203)
+        self.ui.btn_burger_teriyaki.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/burger_teriyaki.jpg"))
+        self.ui.btn_burger_teriyaki.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_burger_teriyaki, "burger", 204)
+        #image-spaghetti
+        self.ui.btn_spaghetti_drunk.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spaghetti_drunk.jpg"))
+        self.ui.btn_spaghetti_drunk.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_spaghetti_drunk, "pasta", 301)
+        self.ui.btn_spaghetti_carbonara.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spaghetti_carbonara.jpg"))
+        self.ui.btn_spaghetti_carbonara.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_spaghetti_carbonara, "pasta", 302)
+        self.ui.btn_spaghetti_tomyum.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spaghetti_tomyum.jpg"))
+        self.ui.btn_spaghetti_tomyum.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_spaghetti_tomyum, "pasta", 303)
+        #image-salad
+        self.ui.btn_salad_tuna.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/salad_tuna.png"))
+        self.ui.btn_salad_tuna.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_salad_tuna, "salad", 401)
+        self.ui.btn_salad_apple.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/salad_apple.jpg"))
+        self.ui.btn_salad_apple.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_salad_apple, "salad", 402)
+        self.ui.btn_salad_vegetable.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/salad_vegetable.jpg"))
+        self.ui.btn_salad_vegetable.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_salad_vegetable, "salad", 403)
+        #image-snacks
+        self.ui.btn_frenchfries.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/frenchfries.jpg"))
+        self.ui.btn_frenchfries.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_frenchfries, "snacks", 501)
+        self.ui.btn_bread.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/bread.jpg"))
+        self.ui.btn_bread.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_bread, "snacks", 502)
+        self.ui.btn_potatoes.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/potatoes.jpg"))
+        self.ui.btn_potatoes.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_potatoes, "snacks", 503)
+        self.ui.btn_onion.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/onion.jpg"))
+        self.ui.btn_onion.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_onion, "snacks", 504)
+        self.ui.btn_spinach.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/spinach.jpg"))
+        self.ui.btn_spinach.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_spinach, "snacks", 505)
+        #image-drinks
+        self.ui.btn_coke_glass.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/coke_glass.jpeg"))
+        self.ui.btn_coke_glass.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_coke_glass, "drinks", 601)
+        self.ui.btn_coke_jug.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/coke_jug.jpeg"))
+        self.ui.btn_coke_jug.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_coke_jug, "drinks", 602)
+        self.ui.btn_lemontea.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/lemontea.jpg"))
+        self.ui.btn_lemontea.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_lemontea, "drinks", 603)
+        self.ui.btn_bluehawaiian.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/bluehawaiian.png"))
+        self.ui.btn_bluehawaiian.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_bluehawaiian, "drinks", 604)
+        self.ui.btn_redsoda.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/redsoda.jpg"))
+        self.ui.btn_redsoda.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_redsoda, "drinks", 605)
+        self.ui.btn_passionfruit.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/passionfruit.jpg"))
+        self.ui.btn_passionfruit.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_passionfruit, "drinks", 606)
+        self.ui.btn_water.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/water.jpeg"))
+        self.ui.btn_water.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_water, "drinks", 607)
+        self.ui.btn_ice.setIcon(QIcon("D:/code/python/pythonProject/05016385/Project/img/ice.jpg"))
+        self.ui.btn_ice.setIconSize(QSize(110, 100))
+        self.setup_button_ui(self.ui.btn_ice, "drinks", 608)
 
         #button actions
-        self.ui.btn_steak_garlic.clicked.connect(lambda: self.add_to_cart(1, "Garlic Pork Steak", 139))
+        #steak
+        self.ui.btn_steak_garlic.clicked.connect(lambda: self.add_to_cart_db("menus", 101))
+        self.ui.btn_steak_pepper.clicked.connect(lambda: self.add_to_cart_db("menus", 102))
+        self.ui.btn_steak_porkchop.clicked.connect(lambda: self.add_to_cart_db("menus", 103))
+        self.ui.btn_steak_spicy.clicked.connect(lambda: self.add_to_cart_db("menus", 104))
+        self.ui.btn_steak_hamcheese.clicked.connect(lambda: self.add_to_cart_db("menus", 105))
+        self.ui.btn_steak_grillfish.clicked.connect(lambda: self.add_to_cart_db("menus", 106))
+        self.ui.btn_steak_friedfish.clicked.connect(lambda: self.add_to_cart_db("menus", 107))
+        self.ui.btn_steak_teriyaki.clicked.connect(lambda: self.add_to_cart_db("menus", 108))
+        #burger
+        self.ui.btn_burger_bacon.clicked.connect(lambda: self.add_to_cart_db("burger", 201))
+        self.ui.btn_burger_spicy.clicked.connect(lambda: self.add_to_cart_db("burger", 202))
+        self.ui.btn_burger_fish.clicked.connect(lambda: self.add_to_cart_db("burger", 203))
+        self.ui.btn_burger_teriyaki.clicked.connect(lambda: self.add_to_cart_db("burger", 204))
+        #spaghetti
+        self.ui.btn_spaghetti_drunk.clicked.connect(lambda: self.add_to_cart_db("pasta", 301))
+        self.ui.btn_spaghetti_carbonara.clicked.connect(lambda: self.add_to_cart_db("pasta", 302))
+        self.ui.btn_spaghetti_tomyum.clicked.connect(lambda: self.add_to_cart_db("pasta", 303))
+        #salad
+        self.ui.btn_salad_tuna.clicked.connect(lambda: self.add_to_cart_db("salad", 401))
+        self.ui.btn_salad_apple.clicked.connect(lambda: self.add_to_cart_db("salad", 402))
+        self.ui.btn_salad_vegetable.clicked.connect(lambda: self.add_to_cart_db("salad", 403))
+        #snacks
+        self.ui.btn_frenchfries.clicked.connect(lambda: self.add_to_cart_db("snacks", 501))
+        self.ui.btn_bread.clicked.connect(lambda: self.add_to_cart_db("snacks", 502))
+        self.ui.btn_potatoes.clicked.connect(lambda: self.add_to_cart_db("snacks", 503))
+        self.ui.btn_onion.clicked.connect(lambda: self.add_to_cart_db("snacks", 504))
+        self.ui.btn_spinach.clicked.connect(lambda: self.add_to_cart_db("snacks", 505))
+        #drinks
+        self.ui.btn_coke_glass.clicked.connect(lambda: self.add_to_cart_db("drinks", 601))
+        self.ui.btn_coke_jug.clicked.connect(lambda: self.add_to_cart_db("drinks", 602))
+        self.ui.btn_lemontea.clicked.connect(lambda: self.add_to_cart_db("drinks", 603))
+        self.ui.btn_bluehawaiian.clicked.connect(lambda: self.add_to_cart_db("drinks", 604))
+        self.ui.btn_redsoda.clicked.connect(lambda: self.add_to_cart_db("drinks", 605))
+        self.ui.btn_passionfruit.clicked.connect(lambda: self.add_to_cart_db("drinks", 606))
+        self.ui.btn_water.clicked.connect(lambda: self.add_to_cart_db("drinks", 607))
+        self.ui.btn_ice.clicked.connect(lambda: self.add_to_cart_db("drinks", 608))
+
+        #order
+        self.ui.order.cellClicked.connect(self.manage_cart_item)
+        self.ui.pbtn_clear.clicked.connect(self.clear_all_order)
 
         #connection to others pages
         self.ui.pbtn_table.clicked.connect(self.open_table_window)
@@ -160,9 +232,55 @@ class POS_system(QMainWindow):
                 col = 0
                 row += 1
 
+    def search_menu(self):
+
+        search_text, ok_pressed = QInputDialog.getText(self, "ค้นหาเมนู", "พิมพ์ชื่ออาหารที่ต้องการค้นหา:")
+
+        if ok_pressed and search_text:
+
+            for btn in self.all_food_btns:
+                btn.hide()
+
+            buttons_to_show = []
+            search_word = search_text.lower()
+            for btn in self.all_food_btns:
+                if search_word in btn.text().lower():
+                    buttons_to_show.append(btn)
+
+            max_columns = 4
+            row = 0
+            col = 0
+            for btn in buttons_to_show:
+                btn.show()
+                self.ui.gridLayout.addWidget(btn, row, col)
+                col += 1
+                if col >= max_columns:
+                    col = 0
+                    row += 1
+
+            if len(buttons_to_show) == 0:
+                QMessageBox.warning(self, "ผลการค้นหา", f"ไม่พบเมนูที่มีคำว่า '{search_text}'")
+
     def add_to_cart(self, item_id, name, price):
         self.cart.add_item(item_id, name, price, qty=1)
         self.update_ui()
+    def add_to_cart_db(self,table_name, item_id):
+        item_data = self.db.get_menu_item(table_name, item_id)
+        if item_data:
+            self.cart.add_item(item_data["id"], item_data["name"], item_data["price"], qty=1)
+            self.update_ui()
+        else:
+            QMessageBox.warning(self, "Error!", "Error!")
+
+    def setup_button_ui(self, button, table_name, item_id):
+        item_data = self.db.get_menu_item(table_name, item_id)
+
+        if item_data:
+            button.setText(item_data["name"])
+        else:
+            button.setText("ไม่พบข้อมูล")
+
+        button.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
     def update_ui(self):
         items = self.cart.get_all_items()
@@ -176,7 +294,68 @@ class POS_system(QMainWindow):
             self.ui.order.setItem(row_index, 2, QTableWidgetItem(str(total_price)))
 
         total = self.cart.get_total_price()
-        self.ui.lbl_total.setText(f"{total:,.2f}")
+        self.ui.lbl_total.setText(f"{total:,.2f} บาท")
+
+    def manage_cart_item(self, row, column):
+        items = self.cart.get_all_items()
+
+        if row >= len(items):
+            return
+
+        selected_item = items[row]
+        item_id = selected_item["id"]
+        item_name = selected_item["name"]
+        item_qty = selected_item["qty"]
+
+        msg = QMessageBox(self)
+        msg.setWindowTitle("จัดการรายการอาหาร")
+        msg.setIcon(QMessageBox.Icon.Question)
+        msg.setText(f"เมนู: {item_name}\nจำนวนปัจจุบัน: {item_qty} รายการ\n\nคุณต้องการทำอะไร?")
+
+        btn_decrease = msg.addButton("ลดจำนวนลง 1", QMessageBox.ButtonRole.ActionRole)
+        btn_delete = msg.addButton("เคลียร์ทั้งหมด", QMessageBox.ButtonRole.DestructiveRole)
+        btn_cancel = msg.addButton("ยกเลิก", QMessageBox.ButtonRole.RejectRole)
+
+        msg.exec()
+
+        if msg.clickedButton() == btn_decrease:
+            if self.cart.items[item_id]["qty"] > 1:
+                self.cart.items[item_id]["qty"] -= 1
+            else:
+                self.cart.remove_item(item_id)
+            self.update_ui()
+
+        elif msg.clickedButton() == btn_delete:
+            self.cart.remove_item(item_id)
+            self.update_ui()
+
+    def clear_all_order(self):
+        if len(self.cart.get_all_items()) == 0:
+            return
+        clr_msg = QMessageBox()
+        clr_msg.setWindowTitle("ยืนยันการเคลียร์รายการอาหาร")
+        clr_msg.setIcon(QMessageBox.Icon.Warning)
+        clr_msg.setText("ต้องการเคลียร์รายการอาหารทั้งหมด และยกเลิกบิลนี้ใช่หรือไม่?")
+        clr_msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+        if clr_msg.exec() == QMessageBox.StandardButton.Yes:
+            self.cart.clear_cart()
+            self.update_ui()
+
+            self.ui.lbl_current_table.setText("")
+
+            if hasattr(self, 'current_table'):
+                del self.current_table
+            if hasattr(self, 'current_customers'):
+                del self.current_customers
+
+            #cleared successfully
+            clred_msg = QMessageBox(self.table_window)
+            clred_msg.setIcon(QMessageBox.Information)
+            clred_msg.setText(f"เคลียร์รายการสำเร็จ")
+            clred_msg.setWindowTitle("Cleared")
+            clred_msg.exec()
+
 
     #ui_table page
     def open_table_window(self):
@@ -228,11 +407,7 @@ class POS_system(QMainWindow):
 
         if not cust_qty_str or int(cust_qty_str) <= 0 or int(cust_qty_str) > 10:
             #show error box
-            err_msg = QMessageBox()
-            err_msg.setIcon(QMessageBox.Critical)
-            err_msg.setText("โปรดกรอกจำนวนลูกค้าให้ถูกต้อง")
-            err_msg.setWindowTitle("Error!")
-            err_msg.exec_()
+            QMessageBox.Critical(self, "โปรดกรอกจำนวนลูกค้าให้ถูกต้อง", "Error!")
             return
 
         if not hasattr(self, "current_table"):

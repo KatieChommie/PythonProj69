@@ -1,5 +1,8 @@
 import sqlite3
 
+from PySide6.QtWidgets import QMessageBox
+
+
 class DBManager:
     def __init__(self, db_path):
         self.db_path = db_path
@@ -16,16 +19,23 @@ class DBManager:
         except Exception as e:
             return f"Error: {e}"
 
-    def fetch_some(self, table_name, category):
+    def get_menu_item(self, table_name, item_id):
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
-                cursor.execute(f"SELECT * FROM {table_name} WHERE {category}")
-                rows = cursor.fetchall()
-                return [dict(row) for row in rows]
+                cursor.execute(f"SELECT name, price FROM {table_name} WHERE id = ?", (item_id,))
+                rows = cursor.fetchone()
+                if rows:
+                    return {"id": item_id, "name": rows["name"], "price": rows["price"]}
+                return None
         except Exception as e:
-            return f"Error: {e}"
+            err_msg = QMessageBox()
+            err_msg.setIcon(QMessageBox.Critical)
+            err_msg.setText("Error!")
+            err_msg.setWindowTitle("Error!")
+            err_msg.exec_()
+            return None
 
 
 if __name__ == "__main__":

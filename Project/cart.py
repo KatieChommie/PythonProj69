@@ -11,13 +11,11 @@ class Cart:
                 "price": price,
                 "qty": qty
             }
-        print(f"{name} is added!")
 
     def remove_item(self, item_id):
         if item_id in self.items:
             removed_name = self.items[item_id]["name"]
             del self.items[item_id]
-            print(f"deleted {removed_name}")
 
     def get_total_price(self):
         total = 0
