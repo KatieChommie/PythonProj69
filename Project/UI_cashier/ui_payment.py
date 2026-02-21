@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout,
     QHeaderView, QLabel, QPushButton, QSizePolicy,
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
-class Ui_PaymentWindow(object):
+class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
@@ -106,7 +106,7 @@ class Ui_PaymentWindow(object):
         self.label_total.setMinimumSize(QSize(20, 0))
         self.label_total.setStyleSheet(u"QLabel {        \n"
 "color: white;\n"
-"font-size: 45px;\n"
+"font-size: 65px;\n"
 "font-weight: bold;\n"
 "qproperty-alignment: 'AlignVCenter | AlignRight';\n"
 "padding-right: 0px;\n"

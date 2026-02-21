@@ -1,9 +1,12 @@
 import sys
+import qrcode
+import os
+import random
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableWidgetItem, QWidget,
                                QDialog, QMessageBox, QInputDialog, QPushButton,
                                QVBoxLayout, QTableWidget, QHeaderView)
-from PySide6.QtGui import QIcon, Qt
+from PySide6.QtGui import QIcon, Qt, QPixmap
 from ui_menu import Ui_MainWindow
 from ui_table import Ui_TableWindow
 from ui_payment import Ui_PaymentWindow
@@ -381,43 +384,29 @@ class POS_system(QMainWindow):
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
-            success = self.db.save_order(self.current_order_id, table_no, cust_no, total, items, status="unpaid")
+            if hasattr(self, "current_db_order_id"):
+                success = self.db.update_existing_order(self.current_db_order_id, total, items, status="unpaid")
+            else:
+                success = self.db.save_order(self.current_order_id, table_no, cust_no, total, items, status="unpaid")
 
             if success:
                 QMessageBox.information(self, "สำเร็จ", "บันทึกรายการอาหารเรียบร้อยแล้ว!")
 
-                self.cart.clear_cart()
-                self.update_ui()
-                self.ui.lbl_current_table.setText("")
-
-                if hasattr(self, 'current_table'):
-                    del self.current_table
-                if hasattr(self, 'current_customers'):
-                    del self.current_customers
+                self.reset_ui_after_order()
     def clear_all_order(self):
         if len(self.cart.get_all_items()) == 0:
             return
-        clr_msg = QMessageBox()
+        clr_msg = QMessageBox(self)
         clr_msg.setWindowTitle("ยืนยันการเคลียร์รายการอาหาร")
         clr_msg.setIcon(QMessageBox.Icon.Warning)
         clr_msg.setText("ต้องการเคลียร์รายการอาหารทั้งหมด และยกเลิกบิลนี้ใช่หรือไม่?")
         clr_msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
         if clr_msg.exec() == QMessageBox.StandardButton.Yes:
-            self.cart.clear_cart()
-            self.update_ui()
-            self.ui.lbl_current_table.setText("")
-            self.generate_order_id()
-
-            if hasattr(self, 'current_db_order_id'):
-                del self.current_db_order_id
-            if hasattr(self, 'current_table'):
-                del self.current_table
-            if hasattr(self, 'current_customers'):
-                del self.current_customers
+            self.reset_ui_after_order()
 
             #cleared successfully
-            clred_msg = QMessageBox(self.table_window)
+            clred_msg = QMessageBox(self)
             clred_msg.setIcon(QMessageBox.Information)
             clred_msg.setText(f"เคลียร์รายการสำเร็จ")
             clred_msg.setWindowTitle("Cleared")
@@ -554,7 +543,7 @@ class POS_system(QMainWindow):
         net_total = subtotal + vat - discount
 
         self.btn_confirm_pay = QPushButton("ยืนยันการรับเงิน")
-        self.btn_confirm_pay.setMinimumHeight(60)
+        self.btn_confirm_pay.setMinimumHeight(40)
         self.btn_confirm_pay.setStyleSheet(
         "background-color: #079757; color: white; font-size: 20px; font-weight: bold; border-radius: 10px;")
 
@@ -564,20 +553,35 @@ class POS_system(QMainWindow):
         self.ui_payment.table_summary.setItem(1, 0, QTableWidgetItem(f"{vat:,.2f}"))
         self.ui_payment.table_summary.setItem(2, 0, QTableWidgetItem(f"{net_total:,.2f}"))
         self.ui_payment.verticalLayout_2.insertWidget(2, self.btn_confirm_pay)
-        self.ui_payment.label_total.setText(f"{net_total:,.2f}")
+        self.ui_payment.label_total.setText(f"{net_total:,.2f} บาท")
         self.ui_payment.pbtn_back.clicked.connect(self.payment_window.close)
 
         self.btn_confirm_pay.clicked.connect(lambda: self.confirm_payment(net_total))
 
+        mock_text = f"สแกนเพื่อชำระเงิน\nยอดรวมทั้งสิ้น: {net_total:,.2f} บาท"
+        qr_img = qrcode.make(mock_text)
+        qr_img.save("mock_qr.png")
+
+        pixmap = QPixmap("mock_qr.png")
+        self.ui_payment.lbl_qr.setPixmap(pixmap.scaled(220, 220, Qt.KeepAspectRatio))
+        self.ui_payment.lbl_qr.setAlignment(Qt.AlignCenter)
+
         self.payment_window.exec()
+
+
+
 
     def confirm_payment(self, net_total):
         table_no = self.current_table
         cust_no = getattr(self, "current_customers", 1)
         cart_items = self.cart.get_all_items()
 
+        subtotal = self.cart.get_total_price()
+        discount = 0.00
+        vat = subtotal * 0.07
+
         if hasattr(self, "current_db_order_id"):
-            success = self.db.update_order_status(self.current_db_order_id, status="paid")
+            success = self.db.update_existing_order(self.current_db_order_id, net_total, cart_items, status="paid")
         else:
             success = self.db.save_order(self.current_order_id, table_no, cust_no, net_total, cart_items, status="paid")
 
@@ -586,17 +590,10 @@ class POS_system(QMainWindow):
             word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ", "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
             QMessageBox.information(self.payment_window, "ชำระเงินสำเร็จ", f"{random.choice(word)}")
 
-            self.payment_window.close()
-            self.cart.clear_cart()
-            self.update_ui()
-            self.ui.lbl_current_table.setText("")
+            self.print_receipt(self.current_order_id, table_no, cust_no, cart_items, subtotal, discount, vat, net_total)
 
-            if hasattr(self, "current_db_order_id"):
-                del self.current_db_order_id
-            if hasattr(self, "current_table"):
-                del self.current_table
-            if hasattr(self, "current_customers"):
-                del self.current_customers
+            self.payment_window.close()
+            self.reset_ui_after_order()
 
     def reset_ui_after_order(self):
         self.cart.clear_cart()
@@ -605,6 +602,44 @@ class POS_system(QMainWindow):
         for attr in ["current_db_order_id", "current_table", "current_customers"]:
             if hasattr(self, attr): delattr(self, attr)
         self.generate_order_id()
+
+    def print_receipt(self, order_no, table_no, cust_no, cart_items, subtotal, discount, vat, net_total, word=None):
+        if not os.path.exists("receipts"):
+            os.makedirs("receipts")
+        filename = f"receipt/{order_no}.txt"
+        now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+        receipt = f"============================================\n"
+        receipt += f"ร้านอาหารเล็ก ๆ ของฉัน\n"
+        receipt += f"============================================\n"
+        receipt += f"เลขที่บิล : {order_no}\n"
+        receipt += f"วันที่    : {now}\n"
+        receipt += f"โต๊ะ      : {table_no}   |   ลูกค้า : {cust_no} ท่าน\n"
+        receipt += f"--------------------------------------------\n"
+        receipt += f"รายการอาหาร                  รวม(บาท)\n"
+        receipt += f"--------------------------------------------\n"
+
+        for item in cart_items:
+            name = item['name'][:20]
+            qty = item['qty']
+            price_total = item['price'] * qty
+            receipt += f"{name:<20} x{qty:<2} {price_total:>10,.2f}\n"
+
+        receipt += f"--------------------------------------------\n"
+        receipt += f"ยอดรวม (Subtotal) :       {subtotal:>10,.2f}\n"
+        receipt += f"ส่วนลด (Discount) :       {discount:>10,.2f}\n"
+        receipt += f"ภาษี 7% (VAT 7%)  :       {vat:>10,.2f}\n"
+        receipt += f"ยอดสุทธิ (NET)    :       {net_total:>10,.2f}\n"
+        receipt += f"============================================\n"
+        word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ",
+                "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
+        receipt += f"{random.choice(word)}\n"
+        receipt += f"============================================\n"
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(receipt)
+
+        print(f"พิมพ์ใบเสร็จสำเร็จ: {filename}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
