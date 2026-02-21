@@ -1,7 +1,8 @@
 import sys
 from PySide6.QtCore import QSize
-from PySide6.QtWidgets import (QApplication, QMainWindow, QTableWidgetItem,
-                               QWidget, QDialog, QMessageBox, QInputDialog, QPushButton)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QTableWidgetItem, QWidget,
+                               QDialog, QMessageBox, QInputDialog, QPushButton,
+                               QVBoxLayout, QTableWidget, QHeaderView)
 from PySide6.QtGui import QIcon, Qt
 from ui_menu import Ui_MainWindow
 from ui_table import Ui_TableWindow
@@ -18,6 +19,7 @@ class POS_system(QMainWindow):
         self.db = DBManager("D:/code/python/forproj2026/menu.db")
         self.cart = Cart()
 
+        self.ui.pbtn_3.clicked.connect(self.show_order_history)
         self.ui.pbtn_search.clicked.connect(self.search_menu)
         self.generate_order_id()
 
@@ -235,6 +237,26 @@ class POS_system(QMainWindow):
                 col = 0
                 row += 1
 
+    def show_order_history(self):
+        orders = self.db.get_all_orders()
+        dialog = QDialog(self)
+        dialog.setWindowTitle("ประวัติการสั่งซื้อ")
+        dialog.resize(700, 450)
+        layout = QVBoxLayout(dialog)
+        table = QTableWidget()
+        table.setColumnCount(5)
+        table.setHorizontalHeaderLabels(["เลขบิล", "โต๊ะ", "ลูกค้า", "ยอดรวม", "สถานะ"])
+        table.setRowCount(len(orders))
+        for i, o in enumerate(orders):
+            table.setItem(i, 0, QTableWidgetItem(str(o['order_no'])))
+            table.setItem(i, 1, QTableWidgetItem(str(o['table_no'])))
+            table.setItem(i, 2, QTableWidgetItem(str(o['cust_no'])))
+            table.setItem(i, 3, QTableWidgetItem(f"{o['total']:,.2f}"))
+            table.setItem(i, 4, QTableWidgetItem("จ่ายแล้ว" if o['status'] == 'paid' else "ค้างชำระ"))
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        layout.addWidget(table)
+        dialog.exec()
+
     def search_menu(self):
 
         search_text, ok_pressed = QInputDialog.getText(self, "ค้นหาเมนู", "พิมพ์ชื่ออาหารที่ต้องการค้นหา:")
@@ -359,7 +381,7 @@ class POS_system(QMainWindow):
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
-            success = self.db.save_order(table_no, cust_no, total, items, status="unpaid")
+            success = self.db.save_order(self.current_order_id, table_no, cust_no, total, items, status="unpaid")
 
             if success:
                 QMessageBox.information(self, "สำเร็จ", "บันทึกรายการอาหารเรียบร้อยแล้ว!")
@@ -491,6 +513,8 @@ class POS_system(QMainWindow):
 
         if order_data:
             self.current_db_order_id = order_data["order_id"]
+            self.current_order_id = order_data["order_no"]
+            self.ui.lbl_order_id.setText(f"{self.current_order_id}")
             self.cart.clear_cart()
             for item in order_data["items"]:
                 self.cart.add_item(item["menu_order"], item["menu_order"], item['price'], item['qty'])
@@ -555,7 +579,7 @@ class POS_system(QMainWindow):
         if hasattr(self, "current_db_order_id"):
             success = self.db.update_order_status(self.current_db_order_id, status="paid")
         else:
-            success = self.db.save_order(table_no, cust_no, net_total, cart_items, status="paid")
+            success = self.db.save_order(self.current_order_id, table_no, cust_no, net_total, cart_items, status="paid")
 
         if success:
             import random
@@ -573,6 +597,14 @@ class POS_system(QMainWindow):
                 del self.current_table
             if hasattr(self, "current_customers"):
                 del self.current_customers
+
+    def reset_ui_after_order(self):
+        self.cart.clear_cart()
+        self.update_ui()
+        self.ui.lbl_current_table.setText("")
+        for attr in ["current_db_order_id", "current_table", "current_customers"]:
+            if hasattr(self, attr): delattr(self, attr)
+        self.generate_order_id()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

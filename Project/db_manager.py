@@ -31,6 +31,19 @@ class DBManager:
             print("Error")
             return None
 
+    def get_all_orders(self):
+        try:
+            import sqlite3
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM "orders" ORDER BY "id" DESC')
+                rows = cursor.fetchall()
+                return [dict(row) for row in rows]
+        except Exception as e:
+            print(f"Error fetching history: {e}")
+            return []
+
     def save_order(self, table_no, cust_no, total, cart_items, status="paid"):
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -87,3 +100,21 @@ class DBManager:
             print(f"Error updating status: {e}")
             return False
 
+    def save_order(self, order_no, table_no, cust_no, total, cart_items, status = "paid"):
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO orders (order_no, table_no, cust_no, total, status) VALUES (?, ?, ?, ?, ?)",
+                    (order_no, str(table_no), int(cust_no), float(total), status)
+                )
+                new_order_id = cursor.lastrowid
+                for item in cart_items:
+                    cursor.execute(
+                'INSERT INTO "order_item" (order_id, menu_order, qty, price) VALUES (?, ?, ?, ?)',
+                (new_order_id, item["name"], item["qty"], item["price"])
+                    )
+                return True
+        except Exception as e:
+            print(f"Database Error (save_order): {e}")
+            return False
