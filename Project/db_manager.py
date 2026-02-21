@@ -30,12 +30,34 @@ class DBManager:
                     return {"id": item_id, "name": rows["name"], "price": rows["price"]}
                 return None
         except Exception as e:
-            err_msg = QMessageBox()
-            err_msg.setIcon(QMessageBox.Critical)
-            err_msg.setText("Error!")
-            err_msg.setWindowTitle("Error!")
-            err_msg.exec_()
+            QMessageBox.warning(self, "Error!", "Error!")
             return None
+
+    def save_order(self, table_no, cust_no, total, cart_items, status="paid"):
+        try:
+            import sqlite3
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    "INSERT INTO orders (table_no, cust_no, total, status) VALUES (?, ?, ?, ?)",
+                    (str(table_no), int(cust_no), float(total), status)
+                )
+
+                new_order_id = cursor.lastrow_id
+
+                for item in cart_items:
+                    cursor.execute(
+                        "INSERT INTO order_item (order_id, menu_order, qty, price) VALUES (?, ?, ?, ?)",
+                        (new_order_id, item["name"], item["qty"], item["price"])
+                    )
+
+                QMessageBox.information(self, "success!", "success")
+                return True
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error!", "Error!")
+            return False
 
 
 if __name__ == "__main__":
@@ -53,7 +75,7 @@ if __name__ == "__main__":
     if isinstance(data, list):
         print(f"พบข้อมูล {len(data)} รายการ จากหมวดหมู่ {tables[tb-1]}")
         for item in data:
-            print(f"- {item['name']} ราคา {item['price']} บาท") #หมวดหมู่: {item['type']}
+            print(f"- {item['name']} ราคา {item['price']} บาท")
     else:
         print(data)
     print("=" * 50)
