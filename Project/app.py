@@ -226,7 +226,7 @@ class POS_system(QMainWindow):
     def confirm_table(self):
         cust_qty_str = self.ui_table.lineEdit.text()
 
-        if not cust_qty_str or int(cust_qty_str) <= 0 or int(cust_qty_str) >= 10:
+        if not cust_qty_str or int(cust_qty_str) <= 0 or int(cust_qty_str) > 10:
             #show error box
             err_msg = QMessageBox()
             err_msg.setIcon(QMessageBox.Critical)
@@ -254,6 +254,8 @@ class POS_system(QMainWindow):
             success_msg.setInformativeText(f"โต๊ะที่ {self.current_table}\nจำนวนลูกค้าทั้งหมด {cust_qty_str} ท่าน")
             success_msg.setWindowTitle("Success!")
             success_msg.exec()
+            self.ui.lbl_current_table.setText(f"โต๊ะที่ {self.current_table}\nลูกค้า {cust_qty_str} ท่าน")
+            self.table_window.close()
             self.table_window.close()
 
     def open_payment_window(self):
