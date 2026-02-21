@@ -604,8 +604,8 @@ class POS_system(QMainWindow):
         self.generate_order_id()
 
     def print_receipt(self, order_no, table_no, cust_no, cart_items, subtotal, discount, vat, net_total, word=None):
-        if not os.path.exists("receipts"):
-            os.makedirs("receipts")
+        if not os.path.exists("receipt"):
+            os.makedirs("receipt")
         filename = f"receipt/{order_no}.txt"
         now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
