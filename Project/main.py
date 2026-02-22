@@ -2,11 +2,15 @@ import sys
 import os
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
-    QVBoxLayout, QLabel, QPushButton
+    QVBoxLayout, QLabel, QPushButton, QMessageBox
 )
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 from ui_main import Ui_MainWindow
+import sqlite3
+from db_manager import DBManager
+from datetime import datetime
+from cart import Cart
 
 
 class MainWindow(QMainWindow):
@@ -18,6 +22,8 @@ class MainWindow(QMainWindow):
         self.setup_button_icons()
         self.cart = []
         self.update_cart_count()
+        self.db = DBManager("D:/code/python/forproj2026/menu.db")
+        self.cart = Cart()
 
 
         # ================= MENU DATA =================
@@ -112,6 +118,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_home_to_cart.clicked.connect(
             lambda: self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_cart)
         )
+        self.ui.btn_checkout.clicked.connect(self.checkout_order)
 
  
         # เชื่อมปุ่มเพิ่ม/ลดรายกการอาหาร
@@ -459,10 +466,8 @@ class MainWindow(QMainWindow):
             # ---------- ชื่อ ----------
             name_label = QLabel(item["name"])
 
-
             # ---------- จำนวน ----------
             qty_label = QLabel(f"x{item['qty']}  ")
-
 
             # ---------- ราคา ----------
             item_total = item["price"] * item["qty"]
@@ -480,6 +485,44 @@ class MainWindow(QMainWindow):
         layout.addStretch()
 
         self.ui.label_total_price.setText(f"฿{total_price:.2f}")
+
+    def checkout_order(self):
+        if len(self.cart) == 0:
+            return
+        table_no = "2"
+        cust_no = 1
+        total = sum(item["price"] * item["qty"] for item in self.cart)
+        now = datetime.now()
+        order_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
+        status = "unpaid"
+
+        base_path = os.path.dirname(__file__)
+        db_path = os.path.join(base_path, "D:/code/python/forproj2026/menu.db")
+
+        try:
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO orders (order_no, table_no, cust_no, total, status) VALUES (?, ?, ?, ?, ?)",
+                    (order_no, table_no, cust_no, float(total), status)
+                )
+                order_id = cursor.lastrowid
+
+                for item in self.cart:
+                    cursor.execute(
+                        "INSERT INTO order_item (order_id, menu_order, qty, price) VALUES (?, ?, ?, ?)",
+                        (order_id, item["name"], item["qty"], item["price"])
+                    )
+
+            QMessageBox.information(self, "Success!", "ส่งอาหารไปยังครัวกลางเรียบร้อยแล้ว!")
+
+            self.cart.clear()
+            self.load_cart_page()
+            self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_home)
+
+        except Exception as e:
+            QMessageBox.critical(self, "ข้อผิดพลาด", f"ไม่สามารถเชื่อมต่อฐานข้อมูลได้:\n{e}")
+
 
 
 

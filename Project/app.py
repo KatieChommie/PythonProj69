@@ -610,7 +610,7 @@ class POS_system(QMainWindow):
         now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         receipt = f"============================================\n"
-        receipt += f"ร้านอาหารเล็ก ๆ ของฉัน\n"
+        receipt += f"               Steak with Me               \n"
         receipt += f"============================================\n"
         receipt += f"เลขที่บิล : {order_no}\n"
         receipt += f"วันที่    : {now}\n"
