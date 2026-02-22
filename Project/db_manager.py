@@ -142,3 +142,16 @@ class DBManager:
         except Exception as e:
             print(f"Error updating existing order: {e}")
             return False
+
+    def cancel_order(self, order_id):
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE orders SET status = ? WHERE id = ?",
+                    ("cancelled", order_id)
+                )
+                return True
+        except Exception as e:
+            print(f"Error cancelling order: {e}")
+            return False

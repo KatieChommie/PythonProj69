@@ -255,7 +255,7 @@ class POS_system(QMainWindow):
             table.setItem(i, 1, QTableWidgetItem(str(o['table_no'])))
             table.setItem(i, 2, QTableWidgetItem(str(o['cust_no'])))
             table.setItem(i, 3, QTableWidgetItem(f"{o['total']:,.2f}"))
-            table.setItem(i, 4, QTableWidgetItem("จ่ายแล้ว" if o['status'] == 'paid' else "ค้างชำระ"))
+            table.setItem(i, 4, QTableWidgetItem("จ่ายแล้ว" if o['status'] == 'paid' else "ค้างชำระ" if o['status'] == 'unpaid' else "ยกเลิก"))
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(table)
         dialog.exec()
@@ -403,6 +403,9 @@ class POS_system(QMainWindow):
         clr_msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
         if clr_msg.exec() == QMessageBox.StandardButton.Yes:
+            if hasattr(self, "current_db_order_id"):
+                self.db.cancel_order(self.current_db_order_id)
+
             self.reset_ui_after_order()
 
             #cleared successfully
@@ -568,9 +571,6 @@ class POS_system(QMainWindow):
 
         self.payment_window.exec()
 
-
-
-
     def confirm_payment(self, net_total):
         table_no = self.current_table
         cust_no = getattr(self, "current_customers", 1)
@@ -626,10 +626,10 @@ class POS_system(QMainWindow):
             receipt += f"{name:<20} x{qty:<2} {price_total:>10,.2f}\n"
 
         receipt += f"--------------------------------------------\n"
-        receipt += f"ยอดรวม (Subtotal) :       {subtotal:>10,.2f}\n"
-        receipt += f"ส่วนลด (Discount) :       {discount:>10,.2f}\n"
-        receipt += f"ภาษี 7% (VAT 7%)  :       {vat:>10,.2f}\n"
-        receipt += f"ยอดสุทธิ (NET)    :       {net_total:>10,.2f}\n"
+        receipt += f"ยอดรวม (Subtotal):       {subtotal:>10,.2f}\n"
+        receipt += f"ส่วนลด (Discount):        {discount:>10,.2f}\n"
+        receipt += f"ภาษี 7% (VAT 7%):         {vat:>10,.2f}\n"
+        receipt += f"ยอดสุทธิ (NET):            {net_total:>10,.2f}\n"
         receipt += f"============================================\n"
         word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ",
                 "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]

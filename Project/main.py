@@ -20,11 +20,10 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.setup_profile_images()
         self.setup_button_icons()
-        self.cart = []
-        self.update_cart_count()
+
         self.db = DBManager("D:/code/python/forproj2026/menu.db")
         self.cart = Cart()
-
+        self.update_cart_count()
 
         # ================= MENU DATA =================
         self.menu_data = [
@@ -375,9 +374,11 @@ class MainWindow(QMainWindow):
         # ------------------ ตั้งราคา ------------------
         self.ui.label_food_price.setText(f"฿{item['price']}")
 
+        #------------------ ล้างข้อความเพิ่มเติม ------------------
+        self.ui.textEdit_message.clear()
+
         # ------------------ เปลี่ยนหน้า ------------------
         self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_detail)
-        
 
         self.current_item = item
         self.current_qty = 1
@@ -398,8 +399,9 @@ class MainWindow(QMainWindow):
 
     # จำนวนรายการอาหารทั้งหมด
     def update_cart_count(self):
-        total_qty = sum(item["qty"] for item in self.cart)
-        total_price = sum(item["price"] * item["qty"] for item in self.cart)
+        items = self.cart.get_all_items()
+        total_qty = sum(item["qty"] for item in items)
+        total_price = self.cart.get_total_price()
 
         # -------- หน้า HOME (ปุ่มเดียวรวมข้อความ) --------
         if total_qty == 0:
@@ -419,23 +421,16 @@ class MainWindow(QMainWindow):
             return
 
         name = self.current_item["name"]
+        price = self.current_item["price"]
 
-        # ถ้ามีอยู่แล้วให้รวมจำนวน
-        for item in self.cart:
-            if item["name"] == name:
-                item["qty"] += self.current_qty
-                break
-        else:
-            # ถ้ายังไม่มี → เพิ่มใหม่
-            self.cart.append({
-                "name": self.current_item["name"],
-                "price": self.current_item["price"],
-                "image": self.current_item["image"],
-                "qty": self.current_qty
-            })
+        allergy_note = self.ui.textEdit_message.toPlainText().strip()
+        if allergy_note:
+            name = f"{name}\n({allergy_note})"
+
+        self.cart.add_item(item_id=name, name=name, price=price, qty=self.current_qty)
 
         self.load_cart_page()
-        self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_cart)
+        self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_home)
 
     # โหลด รายการที่เลือกทั้งหมด
     def load_cart_page(self):
@@ -450,16 +445,22 @@ class MainWindow(QMainWindow):
 
         base_path = os.path.dirname(__file__)
 
-        total_price = 0
+        items = self.cart.get_all_items()
+        total_price = self.cart.get_total_price()
 
-        for index, item in enumerate(self.cart):
-
+        for item in items:
             container = QWidget()
             hbox = QHBoxLayout(container)
 
             # ---------- รูป ----------
+            image_file = "image/logo.png"
+            for menu in self.menu_data:
+                if menu["name"] in item["name"]:
+                    image_file = menu["image"]
+                    break
+
             img_label = QLabel()
-            image_path = os.path.join(base_path, item["image"])
+            image_path = os.path.join(base_path, image_file)
             pixmap = QPixmap(image_path)
             img_label.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio))
 
@@ -467,61 +468,73 @@ class MainWindow(QMainWindow):
             name_label = QLabel(item["name"])
 
             # ---------- จำนวน ----------
-            qty_label = QLabel(f"x{item['qty']}  ")
+            qty_label = QLabel(f"{item['qty']}  ")
 
             # ---------- ราคา ----------
             item_total = item["price"] * item["qty"]
-            total_price += item_total
             price_label = QLabel(f"฿{item_total}")
+
+            # ---------- เพิ่ม-ลดในตะกร้า ----------
+            from PySide6.QtWidgets import QPushButton
+
+            btn_minus = QPushButton("-")
+            btn_minus.setFixedSize(30, 30)
+            btn_minus.setStyleSheet("background-color: #f2f2f2; font-weight: bold; font-size: 16px;")
+            btn_minus.clicked.connect(lambda checked, item_id=item["id"]: self.adjust_cart_qty(item_id, -1))
+
+            btn_plus = QPushButton("+")
+            btn_plus.setFixedSize(30, 30)
+            btn_plus.setStyleSheet("background-color: #f2f2f2; font-weight: bold; font-size: 16px;")
+            btn_plus.clicked.connect(lambda checked, item_id=item["id"]: self.adjust_cart_qty(item_id, 1))
+
 
             # ---------- layout ----------
             hbox.addWidget(img_label)
             hbox.addWidget(name_label)
             hbox.addStretch()
+            hbox.addWidget(btn_minus)
             hbox.addWidget(qty_label)
+            hbox.addWidget(btn_plus)
             hbox.addWidget(price_label)
             layout.addWidget(container)
 
         layout.addStretch()
-
         self.ui.label_total_price.setText(f"฿{total_price:.2f}")
 
+    def adjust_cart_qty(self, item_id, amount):
+        if item_id in self.cart.items:
+            self.cart.items[item_id]["qty"] += amount
+
+            if self.cart.items[item_id]["qty"] <= 0:
+                self.cart.remove_item(item_id)
+
+        self.load_cart_page()
+
+        if len(self.cart.get_all_items()) == 0:
+            self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_home)
+
+
     def checkout_order(self):
-        if len(self.cart) == 0:
+        items = self.cart.get_all_items()
+        if len(items) == 0:
             return
+
         table_no = "2"
         cust_no = 1
-        total = sum(item["price"] * item["qty"] for item in self.cart)
+        total = self.cart.get_total_price()
         now = datetime.now()
         order_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
         status = "unpaid"
 
-        base_path = os.path.dirname(__file__)
-        db_path = os.path.join(base_path, "D:/code/python/forproj2026/menu.db")
+        success = self.db.save_order(order_no, table_no, cust_no, total, items, status)
 
-        try:
-            with sqlite3.connect(db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    "INSERT INTO orders (order_no, table_no, cust_no, total, status) VALUES (?, ?, ?, ?, ?)",
-                    (order_no, table_no, cust_no, float(total), status)
-                )
-                order_id = cursor.lastrowid
-
-                for item in self.cart:
-                    cursor.execute(
-                        "INSERT INTO order_item (order_id, menu_order, qty, price) VALUES (?, ?, ?, ?)",
-                        (order_id, item["name"], item["qty"], item["price"])
-                    )
-
+        if success:
             QMessageBox.information(self, "Success!", "ส่งอาหารไปยังครัวกลางเรียบร้อยแล้ว!")
-
-            self.cart.clear()
+            self.cart.clear_cart()
             self.load_cart_page()
             self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_home)
-
-        except Exception as e:
-            QMessageBox.critical(self, "ข้อผิดพลาด", f"ไม่สามารถเชื่อมต่อฐานข้อมูลได้:\n{e}")
+        else:
+            QMessageBox.critical(self, "ข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่")
 
 
 
