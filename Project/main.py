@@ -1,16 +1,15 @@
 import sys
-import os
+
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget,
-    QVBoxLayout, QLabel, QPushButton, QMessageBox
+    QApplication, QMainWindow, QMessageBox
 )
-from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 from ui_main import Ui_MainWindow
-import sqlite3
 from db_manager import DBManager
 from datetime import datetime
 from cart import Cart
+from menu_details import MenuItem, FoodNutrients, DrinkNutrients
+import random
 
 
 class MainWindow(QMainWindow):
@@ -28,47 +27,48 @@ class MainWindow(QMainWindow):
         # ================= MENU DATA =================
         self.menu_data = [
             # steak
-            {"name": "Garlic pork", "price": 139, "image": "image/steak_gp.jpg", "category": "steak"},
-            {"name": "Black pepper pork", "price": 139, "image": "image/steak_bpp.jpg", "category": "steak"},
-            {"name": "Pork chop", "price": 169, "image": "image/steak_pch.jpg", "category": "steak"},
-            {"name": "Spicy Grilled Chicken", "price": 119, "image": "image/steak_sgc.jpg", "category": "steak"},
-            {"name": "Teriyaki Chicken", "price": 119, "image": "image/steak_tch.jpg", "category": "steak"},
-            {"name": "Chicken roll with ham and cheese", "price": 139, "image": "image/steak_crwhac.jpg", "category": "steak"},
-            {"name": "Grilled fish", "price": 139, "image": "image/steak_gf.jpg", "category": "steak"},
-            {"name": "Fried fish", "price": 129, "image": "image/steak_ff.jpg", "category": "steak"},
+            MenuItem("Garlic pork", 139, "image/steak_gp.jpg", "steak", ["Energetic"], FoodNutrients(520, 35, 5, 38)),
+            MenuItem("Black pepper pork", 139, "image/steak_bpp.jpg", "steak", ["Energetic", "Spicy & Awake"], FoodNutrients(500, 35, 5, 35)),
+            MenuItem("Pork chop", 169, "image/steak_pch.jpg", "steak", ["Energetic", "Comfort & Healing"], FoodNutrients(550, 35, 5, 40)),
+            MenuItem("Spicy Grilled Chicken", 119, "image/steak_sgc.jpg", "steak", ["Spicy & Awake", "Energetic"], FoodNutrients(350, 35, 5, 18)),
+            MenuItem("Teriyaki Chicken", 119, "image/steak_tch.jpg", "steak", ["Energetic"], FoodNutrients(380, 35, 15, 20)),
+            MenuItem("Chicken roll with ham and cheese", 139, "image/steak_crwhac.jpg", "steak", ["Comfort & Healing", "Energetic"], FoodNutrients(450, 30, 15, 25)),
+            MenuItem("Grilled fish", 139, "image/steak_gf.jpg", "steak", ["Healthy & Light", "Energetic"], FoodNutrients(300, 30, 5, 15)),
+            MenuItem("Fried fish", 129, "image/steak_ff.jpg", "steak", ["Energetic", "Comfort & Healing"], FoodNutrients(500, 25, 35, 28)),
 
             # burger
-            {"name": "Bacon Cheese", "price": 159, "image": "image/burger_bc.jpg", "category": "burger"},
-            {"name": "Spicy Chicken", "price": 139, "image": "image/burger_sc.jpg", "category": "burger"},
-            {"name": "Fish Burger", "price": 139, "image": "image/burger_fish.jpg", "category": "burger"},
-            {"name": "Teriyaki Pork", "price": 149, "image": "image/burger_tp.jpg", "category": "burger"},
+            MenuItem("Bacon Cheese", 159, "image/burger_bc.jpg", "burger", ["Comfort & Healing", "Energetic"], FoodNutrients(680, 35, 45, 40)),
+            MenuItem("Spicy Chicken", 139, "image/burger_sc.jpg", "burger", ["Spicy & Awake", "Energetic"], FoodNutrients(520, 25, 48, 25)),
+            MenuItem("Fish Burger", 139, "image/burger_fish.jpg", "burger", ["Energetic", "Healthy & Light"], FoodNutrients(450, 20, 45, 20)),
+            MenuItem("Teriyaki Pork", 149, "image/burger_tp.jpg", "burger", ["Energetic", "Comfort & Healing"], FoodNutrients(550, 28, 50, 25)),
 
             # pasta
-            {"name": "Seafood Drunk Pasta", "price": 159, "image": "image/pasta_sd.jpg", "category": "pasta"},
-            {"name": "Carbonara", "price": 159, "image": "image/pasta_c.jpg", "category": "pasta"},
-            {"name": "Seafood Tom Yum", "price": 139, "image": "image/pasta_sty.jpg", "category": "pasta"},
+            MenuItem("Seafood Drunk Pasta", 159, "image/pasta_sd.jpg", "pasta", ["Spicy & Awake", "Energetic"], FoodNutrients(450, 25, 55, 12)),
+            MenuItem("Carbonara", 159, "image/pasta_c.jpg", "pasta", ["Comfort & Healing"], FoodNutrients(650, 20, 60, 35)),
+            MenuItem("Seafood Tom Yum", 139, "image/pasta_sty.jpg", "pasta", ["Spicy & Awake", "Energetic"], FoodNutrients(480, 25, 58, 15)),
 
             # salad
-            {"name": "Tuna Salad", "price": 159, "image": "image/salad_tu.jpg", "category": "salad"},
-            {"name": "Apple Salad", "price": 139, "image": "image/salad_ap.jpg", "category": "salad"},
-            {"name": "Fresh Vegetable Salad", "price": 109, "image": "image/salad_fv.jpg", "category": "salad"},
+            MenuItem("Tuna Salad", 159, "image/salad_tu.jpg", "salad", ["Healthy & Light"], FoodNutrients(250, 22, 10, 15)),
+            MenuItem("Apple Salad", 139, "image/salad_ap.jpg", "salad", ["Healthy & Light", "Refreshing"], FoodNutrients(180, 2, 30, 6)),
+            MenuItem("Fresh Vegetable Salad", 109, "image/salad_fv.jpg", "salad", ["Healthy & Light"], FoodNutrients(120, 3, 15, 5)),
 
             # snack
-            {"name": "French Fries", "price": 69, "image": "image/snack_ff.jpg", "category": "snack"},
-            {"name": "Cheese Bread", "price": 15, "image": "image/snack_cb.jpg", "category": "snack"},
-            {"name": "Mashed Potatoes", "price": 55, "image": "image/snack_mp.jpg", "category": "snack"},
-            {"name": "Fried Onion", "price": 59, "image": "image/snack_fo.jpg", "category": "snack"},
-            {"name": "Baked Spinach with Cheese", "price": 99, "image": "image/snack_bswc.jpg", "category": "snack"},
+            MenuItem("French Fries", 69, "image/snack_ff.jpg", "snack", ["Joyful & Sharing", "Comfort & Healing"], FoodNutrients(365, 4, 45, 18)),
+            MenuItem("Cheese Bread", 15, "image/snack_cb.jpg", "snack", ["Joyful & Sharing", "Comfort & Healing"], FoodNutrients(280, 10, 25, 15)),
+            MenuItem("Mashed Potatoes", 55, "image/snack_mp.jpg", "snack", ["Comfort & Healing"], FoodNutrients(220, 4, 30, 10)),
+            MenuItem("Fried Onion", 59, "image/snack_fo.jpg", "snack", ["Joyful & Sharing", "Comfort & Healing"], FoodNutrients(400, 5, 45, 22)),
+            MenuItem("Baked Spinach with Cheese", 99, "image/snack_bswc.jpg", "snack", ["Comfort & Healing", "Joyful & Sharing"], FoodNutrients(320, 12, 10, 25)),
 
             # drink
-            {"name": "Coke Glass", "price": 30, "image": "image/drink_cg.jpg", "category": "drink"},
-            {"name": "Coke Jug", "price": 90, "image": "image/drink_cj.jpg", "category": "drink"},
-            {"name": "Lemon Tea", "price": 40, "image": "image/drink_lt.jpg", "category": "drink"},
-            {"name": "Blue Hawaiian Soda", "price": 40, "image": "image/drink_bhs.jpg", "category": "drink"},
-            {"name": "Red Soda", "price": 40, "image": "image/drink_rs.jpg", "category": "drink"},
-            {"name": "Passion Fruit Soda", "price": 40, "image": "image/drink_pfs.jpg", "category": "drink"},
-            {"name": "Water", "price": 10, "image": "image/drink_water.jpg", "category": "drink"},
-            {"name": "Ice", "price": 2, "image": "image/drink_ice.jpg", "category": "drink"},
+            MenuItem("Coke Glass", 30, "image/drink_cg.jpg", "drink", ["Refreshing", "Comfort & Healing"], DrinkNutrients(140, 39)),
+            MenuItem("Coke Jug", 90, "image/drink_cj.jpg", "drink", ["Joyful & Sharing", "Refreshing"], DrinkNutrients(420, 117)),
+            MenuItem("Lemon Tea", 40, "image/drink_lt.jpg", "drink", ["Refreshing", "Healthy & Light"], DrinkNutrients(120, 28)),
+            MenuItem("Blue Hawaiian Soda", 40, "image/drink_bhs.jpg", "drink", ["Refreshing", "Joyful & Sharing"], DrinkNutrients(140, 32)),
+            MenuItem("Red Soda", 40, "image/drink_rs.jpg", "drink", ["Refreshing", "Spicy & Awake"], DrinkNutrients(120, 29)),
+            MenuItem("Passion Fruit Soda", 40, "image/drink_pfs.jpg", "drink", ["Refreshing", "Healthy & Light"], DrinkNutrients(130, 30)),
+            MenuItem("Water", 10, "image/drink_water.jpg", "drink", ["Healthy & Light", "Refreshing"], DrinkNutrients(0, 0)),
+            MenuItem("Ice", 2, "image/drink_ice.jpg", "drink"),
+
         ]
 
         # สร้างตัวแปรเก็บจำนวน
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_checkout.clicked.connect(self.checkout_order)
 
  
-        # เชื่อมปุ่มเพิ่ม/ลดรายกการอาหาร
+        # เชื่อมปุ่มเพิ่ม/ลดรายการอาหาร
         self.ui.btn_add.clicked.connect(self.increase_qty)
         self.ui.btn_delete.clicked.connect(self.decrease_qty)
         self.ui.btn_add_to_cart.clicked.connect(self.add_to_cart)
@@ -128,6 +128,9 @@ class MainWindow(QMainWindow):
         # โหลดเมนู
         self.load_menu()
         self.set_active_category(self.ui.btn_all)
+
+        # Surprise Menu
+        self.ui.btnSurprise.clicked.connect(self.surprise_me)
 
     # รูปแบบปุ่ม category
     def set_active_category(self, active_btn):
@@ -166,7 +169,6 @@ class MainWindow(QMainWindow):
                 padding: 6.5px 16px;
             }
         """)
-
 
     # ฟังก์ชันใส่รูป icon
     def setup_button_icons(self):
@@ -226,7 +228,6 @@ class MainWindow(QMainWindow):
             )
         )
 
-
     # ล้าง layout
     def clear_layout(self, layout):
         while layout.count():
@@ -235,7 +236,6 @@ class MainWindow(QMainWindow):
             if widget:
                 widget.deleteLater()
 
-    
     # สร้าง widget เมนู 
     def create_menu_widget(self, item):
         from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
         import os
 
         base_path = os.path.dirname(__file__)
-        image_path = os.path.join(base_path, item["image"])
+        image_path = os.path.join(base_path, item.image)
 
         container = QWidget()
         container.setFixedWidth(150)
@@ -282,7 +282,7 @@ class MainWindow(QMainWindow):
         )
 
         # ================= ชื่อ =================
-        name_label = QLabel(item["name"])
+        name_label = QLabel(item.name)
         name_label.setAlignment(Qt.AlignCenter)
         name_label.setStyleSheet("""
             font-size: 14px;
@@ -290,7 +290,7 @@ class MainWindow(QMainWindow):
         """)
 
         # ================= ราคา =================
-        price_label = QLabel(f"฿{item['price']}")
+        price_label = QLabel(f"฿{item.price}")
         price_label.setAlignment(Qt.AlignCenter)
         price_label.setStyleSheet("""
             color: #e53935;
@@ -304,7 +304,6 @@ class MainWindow(QMainWindow):
         vbox.addWidget(price_label)
 
         return container
-
 
     # ----------------------------
     # โหลดเมนูทั้งหมด 2 คอลัมน์
@@ -334,7 +333,7 @@ class MainWindow(QMainWindow):
         col = 0
 
         for item in self.menu_data:
-            if category and item["category"] != category:
+            if category and item.category != category:
                 continue
 
             widget = self.create_menu_widget(item)
@@ -345,7 +344,6 @@ class MainWindow(QMainWindow):
                 col = 0
                 row += 1
 
-
     # ----------------------------
     # เปิดหน้า detail
     # ----------------------------
@@ -355,7 +353,7 @@ class MainWindow(QMainWindow):
         import os
 
         base_path = os.path.dirname(__file__)
-        image_path = os.path.join(base_path, item["image"])
+        image_path = os.path.join(base_path, item.image)
 
         # ------------------ ตั้งค่ารูป ------------------
         pixmap = QPixmap(image_path)
@@ -369,10 +367,14 @@ class MainWindow(QMainWindow):
         )
 
         # ------------------ ตั้งชื่อ ------------------
-        self.ui.label_food_name.setText(item["name"])
+        self.ui.label_food_name.setText(item.name)
 
         # ------------------ ตั้งราคา ------------------
-        self.ui.label_food_price.setText(f"฿{item['price']}")
+        self.ui.label_food_price.setText(f"฿{item.price}")
+
+        # ------------------ แสดง Moods/Nutritions ------------------
+        self.ui.label_mood.setText(f"Mood: {item.get_mood_string()}")
+        self.ui.label_nutri.setText(f"{item.get_nutrients_string()}")
 
         #------------------ ล้างข้อความเพิ่มเติม ------------------
         self.ui.textEdit_message.clear()
@@ -395,7 +397,6 @@ class MainWindow(QMainWindow):
         if self.current_qty > 1:
             self.current_qty -= 1
             self.ui.label_qty_list.setText(str(self.current_qty))
-
 
     # จำนวนรายการอาหารทั้งหมด
     def update_cart_count(self):
@@ -420,8 +421,8 @@ class MainWindow(QMainWindow):
         if not self.current_item:
             return
 
-        name = self.current_item["name"]
-        price = self.current_item["price"]
+        name = self.current_item.name
+        price = self.current_item.price
 
         allergy_note = self.ui.textEdit_message.toPlainText().strip()
         if allergy_note:
@@ -455,8 +456,8 @@ class MainWindow(QMainWindow):
             # ---------- รูป ----------
             image_file = "image/logo.png"
             for menu in self.menu_data:
-                if menu["name"] in item["name"]:
-                    image_file = menu["image"]
+                if menu.name in item["name"]:
+                    image_file = menu.image
                     break
 
             img_label = QLabel()
@@ -513,13 +514,12 @@ class MainWindow(QMainWindow):
         if len(self.cart.get_all_items()) == 0:
             self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_home)
 
-
     def checkout_order(self):
         items = self.cart.get_all_items()
         if len(items) == 0:
             return
 
-        table_no = "2"
+        table_no = "5"
         cust_no = 1
         total = self.cart.get_total_price()
         now = datetime.now()
@@ -536,7 +536,33 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.critical(self, "ข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่")
 
+    ##new function##
+    #surprise_menu
+    def surprise_me(self):
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Surprise Me!")
+        msg.setText("วันนี้คุณรู้สึกอย่างไรบ้าง")
+        btn_healing = msg.addButton("เหนื่อยจัง ขอฮีลใจ", QMessageBox.ActionRole)
+        btn_refreshing = msg.addButton("ง่วง ขอตื่น ๆ หน่อย", QMessageBox.ActionRole)
+        btn_any = msg.addButton("อะไรก็ได้", QMessageBox.ActionRole)
+        msg.addButton("ยกเลิก", QMessageBox.RejectRole)
+        msg.exec()
 
+        #Energetic, Spicy & Awake, Comfort & Healing, Healthy & Light, Joyful & Sharing, Refreshing
+        target_mood = ""
+        if msg.clickedButton() == btn_healing:
+            target_mood = "Comfort & Healing"
+        elif msg.clickedButton() == btn_refreshing:
+            target_mood = "Spicy & Awake" or "Refreshing"
+        elif msg.clickedButton() == btn_any:
+            target_mood = "Energetic" or "Spicy & Awake" or "Comfort & Healing" or "Healthy & Light" or "Joyful & Sharing" or "Refreshing"
+        else:
+            return
+        matching_items = [item for item in self.menu_data if target_mood in item.mood]
+
+        if matching_items:
+            lucky_item = random.choice(matching_items)
+            self.open_detail_page(lucky_item)
 
 
 app = QApplication(sys.argv)

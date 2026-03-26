@@ -66,6 +66,25 @@ class Ui_MainWindow(object):
         self.label_number_table.setObjectName(u"label_number_table")
         self.label_number_table.setGeometry(QRect(10, 10, 71, 21))
         self.label_number_table.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.btnSurprise = QPushButton(self.Profile_shop)
+        self.btnSurprise.setObjectName(u"btnSurprise")
+        self.btnSurprise.setGeometry(QRect(20, 110, 61, 51))
+        self.btnSurprise.setStyleSheet(u"QPushButton {           \n"
+"	background-color: rgb(255, 170, 0);\n"
+"	color: rgb(0, 0, 0);\n"
+"    \n"
+"}\n"
+"\n"
+"QPushButton:hover {  \n"
+"	background-color: rgb(255, 213, 0);\n"
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"	background-color: rgb(255, 191, 0);\n"
+"}")
+        self.btnSurprise.setAutoDefault(False)
+        self.btnSurprise.setFlat(False)
+
         self.category = QWidget(self.page_home)
         self.category.setObjectName(u"category")
         self.category.setGeometry(QRect(0, 160, 341, 61))
@@ -126,7 +145,7 @@ class Ui_MainWindow(object):
         self.scrollArea_category.setWidgetResizable(True)
         self.scrollAreaWidgetContents_category = QWidget()
         self.scrollAreaWidgetContents_category.setObjectName(u"scrollAreaWidgetContents_category")
-        self.scrollAreaWidgetContents_category.setGeometry(QRect(0, 0, 505, 41))
+        self.scrollAreaWidgetContents_category.setGeometry(QRect(0, 0, 514, 41))
         self.horizontalLayout_4 = QHBoxLayout(self.scrollAreaWidgetContents_category)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.btn_all = QPushButton(self.scrollAreaWidgetContents_category)
@@ -317,11 +336,6 @@ class Ui_MainWindow(object):
         self.label_food_name.setObjectName(u"label_food_name")
         self.label_food_name.setGeometry(QRect(20, 20, 281, 16))
         self.label_food_name.setStyleSheet(u"font: 700 11pt \"Arial\";")
-        self.label_food_price = QLabel(self.widget_message)
-        self.label_food_price.setObjectName(u"label_food_price")
-        self.label_food_price.setGeometry(QRect(30, 50, 261, 16))
-        self.label_food_price.setStyleSheet(u"font: 10pt \"Segoe UI\";\n"
-"font: 600 9pt \"Segoe UI\";")
         self.frame_line_detail = QFrame(self.widget_message)
         self.frame_line_detail.setObjectName(u"frame_line_detail")
         self.frame_line_detail.setGeometry(QRect(10, 90, 301, 1))
@@ -334,20 +348,35 @@ class Ui_MainWindow(object):
         self.frame_line_detail.setFrameShadow(QFrame.Shadow.Plain)
         self.label_note_description_2 = QLabel(self.widget_message)
         self.label_note_description_2.setObjectName(u"label_note_description_2")
-        self.label_note_description_2.setGeometry(QRect(20, 110, 101, 16))
+        self.label_note_description_2.setGeometry(QRect(20, 100, 101, 21))
         self.label_note_description_2.setStyleSheet(u"font: 600 10pt \"Segoe UI\";")
         self.label_note_description = QLabel(self.widget_message)
         self.label_note_description.setObjectName(u"label_note_description")
-        self.label_note_description.setGeometry(QRect(20, 140, 261, 16))
+        self.label_note_description.setGeometry(QRect(20, 120, 261, 20))
         self.textEdit_message = QTextEdit(self.widget_message)
         self.textEdit_message.setObjectName(u"textEdit_message")
-        self.textEdit_message.setGeometry(QRect(10, 180, 301, 61))
+        self.textEdit_message.setGeometry(QRect(20, 150, 281, 61))
         self.textEdit_message.setStyleSheet(u"QTextEdit {\n"
 "    border: 1px solid #dddddd;\n"
 "    border-radius: 8px;\n"
 "    padding: 6px;\n"
 "    background-color: white;\n"
 "}")
+        self.label_mood = QLabel(self.widget_message)
+        self.label_mood.setObjectName(u"label_mood")
+        self.label_mood.setGeometry(QRect(20, 220, 281, 16))
+        self.label_mood.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
+        self.label_nutri = QLabel(self.widget_message)
+        self.label_nutri.setObjectName(u"label_nutri")
+        self.label_nutri.setGeometry(QRect(20, 250, 281, 21))
+        self.label_nutri.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
+        self.label_food_price = QLabel(self.widget_message)
+        self.label_food_price.setObjectName(u"label_food_price")
+        self.label_food_price.setGeometry(QRect(20, 40, 71, 41))
+        font = QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        self.label_food_price.setFont(font)
         self.widget_add_to_cart = QWidget(self.widget_detail_2)
         self.widget_add_to_cart.setObjectName(u"widget_add_to_cart")
         self.widget_add_to_cart.setGeometry(QRect(0, 530, 321, 71))
@@ -653,6 +682,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget_2.setCurrentIndex(0)
+        self.btnSurprise.setDefault(False)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -664,6 +694,7 @@ class Ui_MainWindow(object):
         self.label_name_shop.setText(QCoreApplication.translate("MainWindow", u"Steak With Me", None))
         self.label_logo_shop.setText("")
         self.label_number_table.setText(QCoreApplication.translate("MainWindow", u"\u0e42\u0e15\u0e4a\u0e30 : #2", None))
+        self.btnSurprise.setText(QCoreApplication.translate("MainWindow", u"Surprise", None))
         self.btn_all.setText(QCoreApplication.translate("MainWindow", u"\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14", None))
         self.btn_steak.setText(QCoreApplication.translate("MainWindow", u"\u0e2a\u0e40\u0e15\u0e47\u0e01", None))
         self.btn_burger.setText(QCoreApplication.translate("MainWindow", u"\u0e40\u0e1a\u0e2d\u0e23\u0e4c\u0e40\u0e01\u0e2d\u0e23\u0e4c", None))
@@ -676,10 +707,12 @@ class Ui_MainWindow(object):
         self.label_food_image.setText("")
         self.btn_detail_to_home.setText("")
         self.label_food_name.setText("")
-        self.label_food_price.setText(QCoreApplication.translate("MainWindow", u"\u0e3f0", None))
         self.label_note_description_2.setText(QCoreApplication.translate("MainWindow", u"\u0e02\u0e49\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21", None))
         self.label_note_description.setText(QCoreApplication.translate("MainWindow", u"\u0e04\u0e38\u0e13\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e43\u0e2a\u0e48\u0e02\u0e49\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21\u0e44\u0e14\u0e49\u0e17\u0e35\u0e48\u0e19\u0e35\u0e48 \u0e40\u0e0a\u0e48\u0e19 \u0e2d\u0e32\u0e2b\u0e32\u0e23\u0e17\u0e35\u0e48\u0e41\u0e1e\u0e49", None))
         self.textEdit_message.setPlaceholderText(QCoreApplication.translate("MainWindow", u"\"\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e02\u0e49\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21...\"", None))
+        self.label_mood.setText("")
+        self.label_nutri.setText("")
+        self.label_food_price.setText(QCoreApplication.translate("MainWindow", u"\u0e3f0", None))
         self.btn_delete.setText("")
 #if QT_CONFIG(tooltip)
         self.label_qty_list.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><br/>1</p></body></html>", None))
