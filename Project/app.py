@@ -533,15 +533,43 @@ class POS_system(QMainWindow):
         self.ui_payment = Ui_PaymentWindow()
         self.ui_payment.setupUi(self.payment_window)
 
+        total_cal = 0
+        total_p = 0
+        total_c = 0
+        total_f = 0
+        total_s = 0
+
         self.ui_payment.table_order.setRowCount(len(items))
         for row_index, item in enumerate(items):
+
+            nutri = self.get_nutrition_for_item(item['name'])
+            cal = nutri.get("cal", 0) * item['qty']
+            p = nutri.get("p", 0) * item['qty']
+            c = nutri.get("c", 0) * item['qty']
+            f = nutri.get("f", 0) * item['qty']
+            s = nutri.get("s", 0) * item['qty']
+            if cal > 0 or s > 0:
+                display_name = f"{item['name']}\n   (🔥{cal}kcal | P:{p}g | C:{c}g | F:{f}g | S:{s}g)"
+            else:
+                display_name = item['name']
+
             self.ui_payment.table_order.setItem(row_index, 0, QTableWidgetItem(item["name"]))
             self.ui_payment.table_order.setItem(row_index, 1, QTableWidgetItem(str(item["qty"])))
             total_price = item["price"] * item["qty"]
             self.ui_payment.table_order.setItem(row_index, 2, QTableWidgetItem(f"{total_price:,.2f}"))
 
+            self.ui_payment.table_order.setRowHeight(row_index, 50)
+
+            #new
+            nutri = self.get_nutrition_for_item(item['name'])
+            total_cal += nutri.get("cal", 0) * item['qty']
+            total_p += nutri.get("p", 0) * item['qty']
+            total_c += nutri.get("c", 0) * item['qty']
+            total_f += nutri.get("f", 0) * item['qty']
+            total_s += nutri.get("s", 0) * item['qty']
+
         subtotal = self.cart.get_total_price()
-        discount = 0.00
+        discount = subtotal * 0.1
         vat = subtotal * 0.07
         net_total = subtotal + vat - discount
 
@@ -550,16 +578,30 @@ class POS_system(QMainWindow):
         self.btn_confirm_pay.setStyleSheet(
         "background-color: #079757; color: white; font-size: 20px; font-weight: bold; border-radius: 10px;")
 
+        #new
+        row_count = self.ui_payment.table_summary.rowCount()
+        self.ui_payment.table_summary.insertRow(row_count)
+        nutri_header = QTableWidgetItem("📊 ข้อมูลโภชนาการรวม")
+        font = nutri_header.font()
+        font.setBold(True)
+        nutri_header.setFont(font)
+        self.ui_payment.table_summary.setVerticalHeaderItem(row_count, nutri_header)
+
+        # จัดข้อความให้แสดงผลสวยๆ ใน 1 ช่อง
+        nutri_text = f"🔥 {total_cal} kcal | 🥩 P:{total_p}g | 🍚 C:{total_c}g | 🥑 F:{total_f}g | 🍬 S:{total_s}g"
+
         self.ui_payment.table_summary.setColumnCount(1)
         self.ui_payment.table_summary.horizontalHeader().setVisible(False)
         self.ui_payment.table_summary.setItem(0, 0, QTableWidgetItem(f"{discount:,.2f}"))
         self.ui_payment.table_summary.setItem(1, 0, QTableWidgetItem(f"{vat:,.2f}"))
         self.ui_payment.table_summary.setItem(2, 0, QTableWidgetItem(f"{net_total:,.2f}"))
+        self.ui_payment.table_summary.setItem(3, 0, QTableWidgetItem(nutri_text))
+
         self.ui_payment.verticalLayout_2.insertWidget(2, self.btn_confirm_pay)
         self.ui_payment.label_total.setText(f"{net_total:,.2f} บาท")
         self.ui_payment.pbtn_back.clicked.connect(self.payment_window.close)
 
-        self.btn_confirm_pay.clicked.connect(lambda: self.confirm_payment(net_total))
+        self.btn_confirm_pay.clicked.connect(lambda: self.confirm_payment(net_total, total_cal, total_p, total_c, total_f, total_s))
 
         mock_text = f"สแกนเพื่อชำระเงิน\nยอดรวมทั้งสิ้น: {net_total:,.2f} บาท"
         qr_img = qrcode.make(mock_text)
@@ -571,13 +613,13 @@ class POS_system(QMainWindow):
 
         self.payment_window.exec()
 
-    def confirm_payment(self, net_total):
+    def confirm_payment(self, net_total, total_cal, total_p, total_c, total_f, total_s):
         table_no = self.current_table
         cust_no = getattr(self, "current_customers", 1)
         cart_items = self.cart.get_all_items()
 
         subtotal = self.cart.get_total_price()
-        discount = 0.00
+        discount = 10.00
         vat = subtotal * 0.07
 
         if hasattr(self, "current_db_order_id"):
@@ -590,7 +632,7 @@ class POS_system(QMainWindow):
             word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ", "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
             QMessageBox.information(self.payment_window, "ชำระเงินสำเร็จ", f"{random.choice(word)}")
 
-            self.print_receipt(self.current_order_id, table_no, cust_no, cart_items, subtotal, discount, vat, net_total)
+            self.print_receipt(self.current_order_id, table_no, cust_no, cart_items, subtotal, discount, vat, net_total, total_cal, total_p, total_c, total_f, total_s)
 
             self.payment_window.close()
             self.reset_ui_after_order()
@@ -603,7 +645,9 @@ class POS_system(QMainWindow):
             if hasattr(self, attr): delattr(self, attr)
         self.generate_order_id()
 
-    def print_receipt(self, order_no, table_no, cust_no, cart_items, subtotal, discount, vat, net_total, word=None):
+    def print_receipt(self, order_no, table_no, cust_no, cart_items,
+                      subtotal, discount, vat, net_total,
+                      total_cal=0, total_p=0, total_c=0, total_f=0, total_s=0, word=None):
         if not os.path.exists("receipt"):
             os.makedirs("receipt")
         filename = f"receipt/{order_no}.txt"
@@ -630,6 +674,13 @@ class POS_system(QMainWindow):
         receipt += f"ส่วนลด (Discount):        {discount:>10,.2f}\n"
         receipt += f"ภาษี 7% (VAT 7%):         {vat:>10,.2f}\n"
         receipt += f"ยอดสุทธิ (NET):            {net_total:>10,.2f}\n"
+        receipt += f"--------------------------------------------\n"
+        receipt += f"📊 ข้อมูลโภชนาการมื้อนี้ (Nutrition Facts):\n"
+        receipt += f"🔥 แคลอรี่ (Calories):      {total_cal:>10} kcal\n"
+        receipt += f"🥩 โปรตีน (Protein):        {total_p:>10} g\n"
+        receipt += f"🍚 คาร์บ (Carbs):           {total_c:>10} g\n"
+        receipt += f"🥑 ไขมัน (Fat):             {total_f:>10} g\n"
+        receipt += f"🍬 น้ำตาล (Sugar):          {total_s:>10} g\n"
         receipt += f"============================================\n"
         word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ",
                 "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
@@ -640,6 +691,56 @@ class POS_system(QMainWindow):
             f.write(receipt)
 
         print(f"พิมพ์ใบเสร็จสำเร็จ: {filename}")
+
+
+    #new
+    def get_nutrition_for_item(self, item_name):
+        # เพิ่มค่าน้ำตาล ("s") เข้ามาสำหรับเครื่องดื่มโดยเฉพาะ
+        nutrition_db = {
+            # --- Pasta ---
+            "Seafood Drunk Pasta": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
+            "Carbonara": {"cal": 650, "p": 20, "c": 60, "f": 35, "s": 0},
+            "Seafood Tom Yum": {"cal": 480, "p": 25, "c": 58, "f": 15, "s": 0},
+            # --- Burger ---
+            "Bacon Cheese": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
+            "Teriyaki Pork": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
+            "Fish Burger": {"cal": 450, "p": 20, "c": 45, "f": 20, "s": 0},
+            "Spicy Chicken": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
+            # --- Salad ---
+            "Tuna Salad": {"cal": 250, "p": 22, "c": 10, "f": 15, "s": 0},
+            "Fresh Vegetable Salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
+            "Apple Salad": {"cal": 180, "p": 2, "c": 30, "f": 6, "s": 0},
+            # --- Snack ---
+            "French Fries": {"cal": 365, "p": 4, "c": 45, "f": 18, "s": 0},
+            "Spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
+            "Fried Onion": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
+            "Mashed Potatoes": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
+            "Cheese Bread": {"cal": 280, "p": 10, "c": 25, "f": 15, "s": 0},
+            # --- Steak ---
+            "Teriyaki Chicken": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
+            "Grilled fish": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
+            "Fried fish": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
+            "Garlic pork": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
+            "Black pepper pork": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
+            "Pork chop": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
+            "Spicy Grilled": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
+            "Chicken roll": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
+            # --- Drink (เน้นน้ำตาล "s" แทนคาร์บปกติ) ---
+            "Coke Glass": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
+            "Coke Jug": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
+            "Lemon Tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
+            "Blue Hawaiian": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
+            "Red Soda": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 29},
+            "Passion Fruit": {"cal": 130, "p": 0, "c": 0, "f": 0, "s": 30},
+            "Water": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0},
+            "Ice": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
+        }
+
+        clean_name = item_name.split('\n')[0].strip()
+        for key, data in nutrition_db.items():
+            if key in clean_name:
+                return data
+        return {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
