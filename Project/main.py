@@ -132,6 +132,7 @@ class MainWindow(QMainWindow):
         # Surprise Menu
         self.ui.btnSurprise.clicked.connect(self.surprise_me)
 
+
     # รูปแบบปุ่ม category
     def set_active_category(self, active_btn):
 
@@ -314,7 +315,7 @@ class MainWindow(QMainWindow):
 
         # ================= ตั้งชื่อหัวข้อ =================
         category_name = {
-            None: "ทั้งหมด",
+            None: "ไฮไลท์",
             "steak": "สเต็ก",
             "burger": "เบอร์เกอร์",
             "pasta": "สปาเกตตี",
@@ -323,7 +324,18 @@ class MainWindow(QMainWindow):
             "drink": "เครื่องดื่ม"
         }
 
-        self.ui.label_all_title.setText(category_name.get(category, "ทั้งหมด"))
+        ##new
+        title_text = category_name.get(category, "ทั้งหมด")
+
+        if category is None:
+            from datetime import datetime
+            current_hour = datetime.now().hour
+            if 13 <= current_hour <= 16:
+                title_text = "Afternoon Boost: เมนูปลุกความสดชื่น!"
+            elif current_hour >= 17:
+                title_text = "Dinner Time: เมนูฮีลใจหลังเลิกงาน"
+
+        self.ui.label_all_title.setText(title_text)
 
          # ================= ตั้งค่า grid =================
         grid.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
@@ -335,6 +347,16 @@ class MainWindow(QMainWindow):
         for item in self.menu_data:
             if category and item.category != category:
                 continue
+
+            if category is None:
+                if 13 <= current_hour <= 16:
+                    target_moods = ["Refreshing", "Spicy & Awake", "Energetic", "Healthy & Light"]
+                    if not any(m in item.mood for m in target_moods):
+                        continue
+                elif current_hour >= 17:
+                    target_moods = ["Comfort & Healing", "Joyful & Sharing"]
+                    if not any(m in item.mood for m in target_moods):
+                        continue
 
             widget = self.create_menu_widget(item)
             grid.addWidget(widget, row, col)
@@ -539,30 +561,64 @@ class MainWindow(QMainWindow):
     ##new function##
     #surprise_menu
     def surprise_me(self):
-        msg = QMessageBox(self)
-        msg.setWindowTitle("Surprise Me!")
-        msg.setText("วันนี้คุณรู้สึกอย่างไรบ้าง")
-        btn_healing = msg.addButton("เหนื่อยจัง ขอฮีลใจ", QMessageBox.ActionRole)
-        btn_refreshing = msg.addButton("ง่วง ขอตื่น ๆ หน่อย", QMessageBox.ActionRole)
-        btn_any = msg.addButton("อะไรก็ได้", QMessageBox.ActionRole)
-        msg.addButton("ยกเลิก", QMessageBox.RejectRole)
-        msg.exec()
+        from PySide6.QtWidgets import QMessageBox, QInputDialog
+        import random
 
-        #Energetic, Spicy & Awake, Comfort & Healing, Healthy & Light, Joyful & Sharing, Refreshing
-        target_mood = ""
-        if msg.clickedButton() == btn_healing:
-            target_mood = "Comfort & Healing"
-        elif msg.clickedButton() == btn_refreshing:
-            target_mood = "Spicy & Awake" or "Refreshing"
-        elif msg.clickedButton() == btn_any:
-            target_mood = "Energetic" or "Spicy & Awake" or "Comfort & Healing" or "Healthy & Light" or "Joyful & Sharing" or "Refreshing"
+        # --- เลือกโหมดการสุ่ม ---
+        msg_mode = QMessageBox(self)
+        msg_mode.setWindowTitle("Surprise Me!")
+        msg_mode.setText("เลือกอาหารแบบไหนดี?")
+        btn_mood = msg_mode.addButton("ตามอารมณ์", QMessageBox.ActionRole)
+        btn_combo = msg_mode.addButton("จัดเซ็ตคู่ (อาหารและเครื่องดื่ม)", QMessageBox.ActionRole)
+        btn_any = msg_mode.addButton("อะไรก็ได้", QMessageBox.ActionRole)
+        msg_mode.addButton("ยกเลิก", QMessageBox.RejectRole)
+        msg_mode.exec()
+
+        clicked_mode = msg_mode.clickedButton()
+
+        # --- สุ่มตาม Mood ---
+        if clicked_mode == btn_mood:
+            mood_map = {
+                "ฮีลใจ": "Comfort & Healing",
+                "เติมพลัง": "Energetic",
+                "แซ่บ ๆ ": "Spicy & Awake",
+                "อาหารคลีน": "Healthy",
+                "สดชื่น": "Refreshing",
+                "กินได้หลายคน": "Joyful & Sharing"
+            }
+            mood_choice, ok = QInputDialog.getItem(self, "Surprise Me", "วันนี้รู้สึกยังไง?", list(mood_map.keys()), 0, False)
+            if ok:
+                target = mood_map[mood_choice]
+                match = [item for item in self.menu_data if target in item.mood]
+                self.show_surprise_result(match)
+
+        # --- สุ่มแบบจับคู่ ---
+        elif clicked_mode == btn_combo:
+            foods = [i for i in self.menu_data if i.category != "drink"]
+            drinks = [i for i in self.menu_data if i.category == "drink"]
+            if foods and drinks:
+                f = random.choice(foods)
+                d = random.choice(drinks)
+                QMessageBox.information(self, "Surprise Combo!",
+                    f"เซ็ตแนะนำสำหรับคุณ:\n\n{f.name}\n{d.name}\n\nราคารวม: {f.price + d.price} บาท")
+                self.open_detail_page(f)
+
+        # --- อะไรก็ได้ ---
+        elif clicked_mode == btn_any:
+            self.show_surprise_result(self.menu_data)
+
+    def show_surprise_result(self, items, criteria=""):
+        import random
+        from PySide6.QtWidgets import QMessageBox
+        if items:
+            lucky = random.choice(items)
+            QMessageBox.information(self, "เจอแล้ว! ", f"เมนูสุ่ม{criteria} สำหรับคุณคือ:\n\n{lucky.name} ")
+            self.open_detail_page(lucky)
         else:
-            return
-        matching_items = [item for item in self.menu_data if target_mood in item.mood]
+            QMessageBox.warning(self, "ขออภัย", "ไม่พบเมนูที่ตรงตามเงื่อนไขครับ")
 
-        if matching_items:
-            lucky_item = random.choice(matching_items)
-            self.open_detail_page(lucky_item)
+
+
 
 
 app = QApplication(sys.argv)

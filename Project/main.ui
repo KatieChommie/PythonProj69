@@ -143,6 +143,48 @@ border: none;</string>
           <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
+        <widget class="QPushButton" name="btnSurprise">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>110</y>
+           <width>61</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Arial</family>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {           
+	background-color: rgb(255, 170, 0);
+	color: rgb(0, 0, 0);
+    
+}
+
+QPushButton:hover {  
+	background-color: rgb(255, 213, 0);
+}
+
+QPushButton:pressed {
+	background-color: rgb(255, 191, 0);
+}</string>
+         </property>
+         <property name="text">
+          <string>Surprise</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="default">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="category" native="true">
         <property name="geometry">
@@ -225,7 +267,7 @@ QScrollBar::sub-page:horizontal {
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>505</width>
+              <width>512</width>
               <height>41</height>
              </rect>
             </property>
@@ -233,7 +275,7 @@ QScrollBar::sub-page:horizontal {
              <item>
               <widget class="QPushButton" name="btn_all">
                <property name="text">
-                <string>ทั้งหมด</string>
+                <string>ไฮไลท์</string>
                </property>
               </widget>
              </item>
@@ -634,23 +676,6 @@ border-radius: 15px;</string>
              <string/>
             </property>
            </widget>
-           <widget class="QLabel" name="label_food_price">
-            <property name="geometry">
-             <rect>
-              <x>30</x>
-              <y>50</y>
-              <width>261</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">font: 10pt &quot;Segoe UI&quot;;
-font: 600 9pt &quot;Segoe UI&quot;;</string>
-            </property>
-            <property name="text">
-             <string>฿0</string>
-            </property>
-           </widget>
            <widget class="QFrame" name="frame_line_detail">
             <property name="geometry">
              <rect>
@@ -678,9 +703,9 @@ font: 600 9pt &quot;Segoe UI&quot;;</string>
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>110</y>
+              <y>100</y>
               <width>101</width>
-              <height>16</height>
+              <height>21</height>
              </rect>
             </property>
             <property name="styleSheet">
@@ -694,9 +719,9 @@ font: 600 9pt &quot;Segoe UI&quot;;</string>
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>140</y>
+              <y>120</y>
               <width>261</width>
-              <height>16</height>
+              <height>20</height>
              </rect>
             </property>
             <property name="text">
@@ -706,9 +731,9 @@ font: 600 9pt &quot;Segoe UI&quot;;</string>
            <widget class="QTextEdit" name="textEdit_message">
             <property name="geometry">
              <rect>
-              <x>10</x>
-              <y>180</y>
-              <width>301</width>
+              <x>20</x>
+              <y>150</y>
+              <width>281</width>
               <height>61</height>
              </rect>
             </property>
@@ -722,6 +747,57 @@ font: 600 9pt &quot;Segoe UI&quot;;</string>
             </property>
             <property name="placeholderText">
              <string>&quot;เพิ่มข้อความเพิ่มเติม...&quot;</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_mood">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>220</y>
+              <width>281</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_nutri">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>250</y>
+              <width>281</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_food_price">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>40</y>
+              <width>71</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>฿0</string>
             </property>
            </widget>
           </widget>
