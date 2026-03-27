@@ -35,30 +35,25 @@ class MainWindow(QMainWindow):
             MenuItem("Chicken roll with ham and cheese", 139, "image/steak_crwhac.jpg", "steak", ["Comfort & Healing", "Energetic"], FoodNutrients(450, 30, 15, 25)),
             MenuItem("Grilled fish", 139, "image/steak_gf.jpg", "steak", ["Healthy & Light", "Energetic"], FoodNutrients(300, 30, 5, 15)),
             MenuItem("Fried fish", 129, "image/steak_ff.jpg", "steak", ["Energetic", "Comfort & Healing"], FoodNutrients(500, 25, 35, 28)),
-
             # burger
             MenuItem("Bacon Cheese", 159, "image/burger_bc.jpg", "burger", ["Comfort & Healing", "Energetic"], FoodNutrients(680, 35, 45, 40)),
             MenuItem("Spicy Chicken", 139, "image/burger_sc.jpg", "burger", ["Spicy & Awake", "Energetic"], FoodNutrients(520, 25, 48, 25)),
             MenuItem("Fish Burger", 139, "image/burger_fish.jpg", "burger", ["Energetic", "Healthy & Light"], FoodNutrients(450, 20, 45, 20)),
             MenuItem("Teriyaki Pork", 149, "image/burger_tp.jpg", "burger", ["Energetic", "Comfort & Healing"], FoodNutrients(550, 28, 50, 25)),
-
             # pasta
             MenuItem("Seafood Drunk Pasta", 159, "image/pasta_sd.jpg", "pasta", ["Spicy & Awake", "Energetic"], FoodNutrients(450, 25, 55, 12)),
             MenuItem("Carbonara", 159, "image/pasta_c.jpg", "pasta", ["Comfort & Healing"], FoodNutrients(650, 20, 60, 35)),
             MenuItem("Seafood Tom Yum", 139, "image/pasta_sty.jpg", "pasta", ["Spicy & Awake", "Energetic"], FoodNutrients(480, 25, 58, 15)),
-
             # salad
             MenuItem("Tuna Salad", 159, "image/salad_tu.jpg", "salad", ["Healthy & Light"], FoodNutrients(250, 22, 10, 15)),
             MenuItem("Apple Salad", 139, "image/salad_ap.jpg", "salad", ["Healthy & Light", "Refreshing"], FoodNutrients(180, 2, 30, 6)),
             MenuItem("Fresh Vegetable Salad", 109, "image/salad_fv.jpg", "salad", ["Healthy & Light"], FoodNutrients(120, 3, 15, 5)),
-
             # snack
             MenuItem("French Fries", 69, "image/snack_ff.jpg", "snack", ["Joyful & Sharing", "Comfort & Healing"], FoodNutrients(365, 4, 45, 18)),
             MenuItem("Cheese Bread", 15, "image/snack_cb.jpg", "snack", ["Joyful & Sharing", "Comfort & Healing"], FoodNutrients(280, 10, 25, 15)),
             MenuItem("Mashed Potatoes", 55, "image/snack_mp.jpg", "snack", ["Comfort & Healing"], FoodNutrients(220, 4, 30, 10)),
             MenuItem("Fried Onion", 59, "image/snack_fo.jpg", "snack", ["Joyful & Sharing", "Comfort & Healing"], FoodNutrients(400, 5, 45, 22)),
             MenuItem("Baked Spinach with Cheese", 99, "image/snack_bswc.jpg", "snack", ["Comfort & Healing", "Joyful & Sharing"], FoodNutrients(320, 12, 10, 25)),
-
             # drink
             MenuItem("Coke Glass", 30, "image/drink_cg.jpg", "drink", ["Refreshing", "Comfort & Healing"], DrinkNutrients(140, 39)),
             MenuItem("Coke Jug", 90, "image/drink_cj.jpg", "drink", ["Joyful & Sharing", "Refreshing"], DrinkNutrients(420, 117)),
@@ -543,12 +538,46 @@ class MainWindow(QMainWindow):
 
         table_no = "5"
         cust_no = 1
-        total = self.cart.get_total_price()
-        now = datetime.now()
-        order_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
-        status = "unpaid"
 
-        success = self.db.save_order(order_no, table_no, cust_no, total, items, status)
+        existing_order = self.db.get_unpaid_order(table_no)
+        if existing_order:
+            # Merge the bills
+            order_id = existing_order["order_id"]
+            old_items = existing_order["items"]
+
+            merged_dict = {}
+
+            for old in old_items:
+                name = old["menu_order"]
+                merged_dict[name] = {
+                    "name": name,
+                    "price": old["price"],
+                    "qty": old["qty"]
+                }
+
+            for new in items:
+                name = new["name"]
+                if name in merged_dict:
+                    merged_dict[name]["qty"] += new["qty"]
+                else:
+                    merged_dict[name] = {
+                        "name": name,
+                        "price": new["price"],
+                        "qty": new["qty"]
+                    }
+
+            final_items = list(merged_dict.values())
+            new_total = sum(item["price"] * item["qty"] for item in final_items)
+
+            success = self.db.update_existing_order(order_id, new_total, final_items, status="unpaid")
+
+        else:
+            # New bill
+            total = self.cart.get_total_price()
+            now = datetime.now()
+            order_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
+
+            success = self.db.save_order(order_no, table_no, cust_no, total, items, status="unpaid")
 
         if success:
             QMessageBox.information(self, "Success!", "ส่งอาหารไปยังครัวกลางเรียบร้อยแล้ว!")
@@ -615,10 +644,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "เจอแล้ว! ", f"เมนูสุ่ม{criteria} สำหรับคุณคือ:\n\n{lucky.name} ")
             self.open_detail_page(lucky)
         else:
-            QMessageBox.warning(self, "ขออภัย", "ไม่พบเมนูที่ตรงตามเงื่อนไขครับ")
-
-
-
+            QMessageBox.warning(self, "ขออภัย", "ไม่พบเมนูที่ตรงตามเงื่อนไข")
 
 
 app = QApplication(sys.argv)

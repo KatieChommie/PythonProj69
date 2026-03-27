@@ -695,7 +695,7 @@ class Ui_MainWindow(object):
         self.label_background_shop.setText("")
         self.label_name_shop.setText(QCoreApplication.translate("MainWindow", u"Steak With Me", None))
         self.label_logo_shop.setText("")
-        self.label_number_table.setText(QCoreApplication.translate("MainWindow", u"\u0e42\u0e15\u0e4a\u0e30 : #2", None))
+        self.label_number_table.setText(QCoreApplication.translate("MainWindow", u"\u0e42\u0e15\u0e4a\u0e30 : #5", None))
         self.btnSurprise.setText(QCoreApplication.translate("MainWindow", u"Surprise", None))
         self.btn_all.setText(QCoreApplication.translate("MainWindow", u"\u0e44\u0e2e\u0e44\u0e25\u0e17\u0e4c", None))
         self.btn_steak.setText(QCoreApplication.translate("MainWindow", u"\u0e2a\u0e40\u0e15\u0e47\u0e01", None))

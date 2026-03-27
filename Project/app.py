@@ -569,7 +569,7 @@ class POS_system(QMainWindow):
             total_s += s
 
         subtotal = self.cart.get_total_price()
-        discount = subtotal * 0.1
+        discount = subtotal * 0.15
         vat = subtotal * 0.07
         net_total = subtotal + vat - discount
 
@@ -672,7 +672,7 @@ class POS_system(QMainWindow):
             name = item['name'][:20]
             qty = item['qty']
             price_total = item['price'] * qty
-            receipt += f"{name:<20} x{qty:<2} {price_total:>10,.2f}\n"
+            receipt += f"-{name:<20} x{qty:<2} {price_total:>10,.2f}\n"
 
             nutri = self.get_nutrition_for_item(item['name'])
             cal = nutri.get("cal", 0) * qty
@@ -681,7 +681,7 @@ class POS_system(QMainWindow):
             f = nutri.get("f", 0) * qty
             s = nutri.get("s", 0) * qty
             if cal > 0 or s > 0:
-                receipt += f"[{cal} kcal | P: {p} g | C: {c} g | F: {f} g | S: {s} g]\n"
+                receipt += f"[{cal} kcal, P: {p} g, C: {c} g,\nF: {f} g, S: {s} g]\n"
 
         receipt += f"--------------------------------------------\n"
         receipt += f"ยอดรวม (Subtotal):       {subtotal:>10,.2f}\n"
@@ -698,7 +698,7 @@ class POS_system(QMainWindow):
         receipt += f"============================================\n"
         word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ",
                 "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
-        receipt += f"{random.choice(word)}\n"
+        receipt += f"               {random.choice(word)}               \n"
         receipt += f"============================================\n"
 
         with open(filename, "w", encoding="utf-8") as f:
@@ -710,48 +710,49 @@ class POS_system(QMainWindow):
     #new
     def get_nutrition_for_item(self, item_name):
         nutrition_db = {
+            # --- Steak ---
+            "Garlic pork": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
+            "Black pepper pork": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
+            "Pork chop": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
+            "Spicy Grilled Chicken": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
+            "Teriyaki Chicken": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
+            "Chicken roll with ham and cheese": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
+            "Grilled fish": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
+            "Fried fish": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
+            # --- Burger ---
+            "Bacon Cheese": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
+            "Spicy Chicken": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
+            "Fish Burger": {"cal": 450, "p": 20, "c": 45, "f": 20, "s": 0},
+            "Teriyaki Pork": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
             # --- Pasta ---
             "Seafood Drunk Pasta": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
             "Carbonara": {"cal": 650, "p": 20, "c": 60, "f": 35, "s": 0},
             "Seafood Tom Yum": {"cal": 480, "p": 25, "c": 58, "f": 15, "s": 0},
-            # --- Burger ---
-            "Bacon Cheese": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
-            "Teriyaki Pork": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
-            "Fish Burger": {"cal": 450, "p": 20, "c": 45, "f": 20, "s": 0},
-            "Spicy Chicken": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
             # --- Salad ---
             "Tuna Salad": {"cal": 250, "p": 22, "c": 10, "f": 15, "s": 0},
-            "Fresh Vegetable Salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
             "Apple Salad": {"cal": 180, "p": 2, "c": 30, "f": 6, "s": 0},
+            "Fresh Vegetable Salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
             # --- Snack ---
             "French Fries": {"cal": 365, "p": 4, "c": 45, "f": 18, "s": 0},
-            "Spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
-            "Fried Onion": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
-            "Mashed Potatoes": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
             "Cheese Bread": {"cal": 280, "p": 10, "c": 25, "f": 15, "s": 0},
-            # --- Steak ---
-            "Teriyaki Chicken": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
-            "Grilled fish": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
-            "Fried fish": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
-            "Garlic pork": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
-            "Black pepper pork": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
-            "Pork chop": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
-            "Spicy Grilled": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
-            "Chicken roll": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
+            "Mashed Potatoes": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
+            "Fried Onion": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
+            "Spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
             # --- Drink ---
             "Coke Glass": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
             "Coke Jug": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
             "Lemon Tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
-            "Blue Hawaiian": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
+            "Blue Hawaiian Soda": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
             "Red Soda": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 29},
-            "Passion Fruit": {"cal": 130, "p": 0, "c": 0, "f": 0, "s": 30},
+            "Passion Fruit Soda": {"cal": 130, "p": 0, "c": 0, "f": 0, "s": 30},
             "Water": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0},
             "Ice": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
         }
 
-        clean_name = item_name.split('\n')[0].strip()
+        #data cleaning
+        clean_name = item_name.split('\n')[0].strip().lower()
         for key, data in nutrition_db.items():
-            if key in clean_name:
+            if key.lower() in clean_name:
                 return data
         return {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
 
