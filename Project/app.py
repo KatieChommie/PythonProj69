@@ -624,7 +624,7 @@ class POS_system(QMainWindow):
         cart_items = self.cart.get_all_items()
 
         subtotal = self.cart.get_total_price()
-        discount = 10.00
+        discount = subtotal * 0.15
         vat = subtotal * 0.07
 
         if hasattr(self, "current_db_order_id"):
@@ -685,7 +685,7 @@ class POS_system(QMainWindow):
 
         receipt += f"--------------------------------------------\n"
         receipt += f"ยอดรวม (Subtotal):       {subtotal:>10,.2f}\n"
-        receipt += f"ส่วนลด (Discount):        {discount:>10,.2f}\n"
+        receipt += f"ส่วนลด (Discount):        {-discount:>10,.2f}\n"
         receipt += f"ภาษี 7% (VAT 7%):         {vat:>10,.2f}\n"
         receipt += f"ยอดสุทธิ (NET):            {net_total:>10,.2f}\n"
         receipt += f"--------------------------------------------\n"

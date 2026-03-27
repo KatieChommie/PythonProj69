@@ -592,6 +592,7 @@ class MainWindow(QMainWindow):
     def surprise_me(self):
         from PySide6.QtWidgets import QMessageBox, QInputDialog
         import random
+        exclude_names = ["Ice", "Water"]
 
         # --- เลือกโหมดการสุ่ม ---
         msg_mode = QMessageBox(self)
@@ -608,23 +609,23 @@ class MainWindow(QMainWindow):
         # --- สุ่มตาม Mood ---
         if clicked_mode == btn_mood:
             mood_map = {
-                "ฮีลใจ": "Comfort & Healing",
-                "เติมพลัง": "Energetic",
-                "แซ่บ ๆ ": "Spicy & Awake",
-                "อาหารคลีน": "Healthy",
-                "สดชื่น": "Refreshing",
-                "กินได้หลายคน": "Joyful & Sharing"
+                "อยากฮีลใจ": "Comfort & Healing",
+                "อยากเติมพลัง": "Energetic",
+                "อยากกินแซ่บ ๆ ": "Spicy & Awake",
+                "อยากคลีน": "Healthy",
+                "อยากสดชื่น": "Refreshing",
+                "อยากกินได้หลายคน": "Joyful & Sharing"
             }
             mood_choice, ok = QInputDialog.getItem(self, "Surprise Me", "วันนี้รู้สึกยังไง?", list(mood_map.keys()), 0, False)
             if ok:
                 target = mood_map[mood_choice]
-                match = [item for item in self.menu_data if target in item.mood]
-                self.show_surprise_result(match)
+                match = [item for item in self.menu_data if target in item.mood and item.name not in exclude_names]
+                self.show_surprise_result(match, f"สาย{mood_choice}")
 
         # --- สุ่มแบบจับคู่ ---
         elif clicked_mode == btn_combo:
             foods = [i for i in self.menu_data if i.category != "drink"]
-            drinks = [i for i in self.menu_data if i.category == "drink"]
+            drinks = [i for i in self.menu_data if i.category == "drink" and i.name not in exclude_names]
             if foods and drinks:
                 f = random.choice(foods)
                 d = random.choice(drinks)
@@ -634,14 +635,16 @@ class MainWindow(QMainWindow):
 
         # --- อะไรก็ได้ ---
         elif clicked_mode == btn_any:
-            self.show_surprise_result(self.menu_data)
+            filtered_all = [i for i in self.menu_data if i.name not in exclude_names]
+            self.show_surprise_result(filtered_all, "แบบอะไรก็ได้")
 
     def show_surprise_result(self, items, criteria=""):
         import random
         from PySide6.QtWidgets import QMessageBox
+
         if items:
             lucky = random.choice(items)
-            QMessageBox.information(self, "เจอแล้ว! ", f"เมนูสุ่ม{criteria} สำหรับคุณคือ:\n\n{lucky.name} ")
+            QMessageBox.information(self, "Found!", f"เมนูสุ่ม{criteria} สำหรับคุณคือ:\n\n{lucky.name} ")
             self.open_detail_page(lucky)
         else:
             QMessageBox.warning(self, "ขออภัย", "ไม่พบเมนูที่ตรงตามเงื่อนไข")
