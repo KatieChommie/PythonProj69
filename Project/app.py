@@ -5,7 +5,7 @@ import random
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import (QApplication, QMainWindow, QTableWidgetItem, QWidget,
                                QDialog, QMessageBox, QInputDialog, QPushButton,
-                               QVBoxLayout, QTableWidget, QHeaderView)
+                               QVBoxLayout, QTableWidget, QAbstractItemView, QHeaderView)
 from PySide6.QtGui import QIcon, Qt, QPixmap
 from ui_menu import Ui_MainWindow
 from ui_table import Ui_TableWindow
@@ -548,8 +548,9 @@ class POS_system(QMainWindow):
             c = nutri.get("c", 0) * item['qty']
             f = nutri.get("f", 0) * item['qty']
             s = nutri.get("s", 0) * item['qty']
+
             if cal > 0 or s > 0:
-                display_name = f"{item['name']}\n   (🔥{cal}kcal | P:{p}g | C:{c}g | F:{f}g | S:{s}g)"
+                display_name = f"{item['name']}\n   ({cal} kcal | P: {p} g | C: {c} g | F: {f} g | S: {s} g)"
             else:
                 display_name = item['name']
 
@@ -561,12 +562,11 @@ class POS_system(QMainWindow):
             self.ui_payment.table_order.setRowHeight(row_index, 50)
 
             #new
-            nutri = self.get_nutrition_for_item(item['name'])
-            total_cal += nutri.get("cal", 0) * item['qty']
-            total_p += nutri.get("p", 0) * item['qty']
-            total_c += nutri.get("c", 0) * item['qty']
-            total_f += nutri.get("f", 0) * item['qty']
-            total_s += nutri.get("s", 0) * item['qty']
+            total_cal += cal
+            total_p += p
+            total_c += c
+            total_f += f
+            total_s += s
 
         subtotal = self.cart.get_total_price()
         discount = subtotal * 0.1
@@ -579,23 +579,28 @@ class POS_system(QMainWindow):
         "background-color: #079757; color: white; font-size: 20px; font-weight: bold; border-radius: 10px;")
 
         #new
+        self.ui_payment.table_order.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.ui_payment.table_summary.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         row_count = self.ui_payment.table_summary.rowCount()
         self.ui_payment.table_summary.insertRow(row_count)
-        nutri_header = QTableWidgetItem("📊 ข้อมูลโภชนาการรวม")
+        nutri_header = QTableWidgetItem("ข้อมูลโภชนาการรวม")
         font = nutri_header.font()
         font.setBold(True)
         nutri_header.setFont(font)
         self.ui_payment.table_summary.setVerticalHeaderItem(row_count, nutri_header)
 
-        # จัดข้อความให้แสดงผลสวยๆ ใน 1 ช่อง
-        nutri_text = f"🔥 {total_cal} kcal | 🥩 P:{total_p}g | 🍚 C:{total_c}g | 🥑 F:{total_f}g | 🍬 S:{total_s}g"
+        nutri_text = f"{total_cal} kcal\nProtein: {total_p} g, Carbs: {total_c} g,\nFat: {total_f} g, Sugar: {total_s} g"
 
         self.ui_payment.table_summary.setColumnCount(1)
         self.ui_payment.table_summary.horizontalHeader().setVisible(False)
+        self.ui_payment.table_summary.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.ui_payment.table_summary.setItem(0, 0, QTableWidgetItem(f"{discount:,.2f}"))
         self.ui_payment.table_summary.setItem(1, 0, QTableWidgetItem(f"{vat:,.2f}"))
         self.ui_payment.table_summary.setItem(2, 0, QTableWidgetItem(f"{net_total:,.2f}"))
         self.ui_payment.table_summary.setItem(3, 0, QTableWidgetItem(nutri_text))
+
+        self.ui_payment.table_summary.resizeRowToContents(3)
 
         self.ui_payment.verticalLayout_2.insertWidget(2, self.btn_confirm_pay)
         self.ui_payment.label_total.setText(f"{net_total:,.2f} บาท")
@@ -669,18 +674,27 @@ class POS_system(QMainWindow):
             price_total = item['price'] * qty
             receipt += f"{name:<20} x{qty:<2} {price_total:>10,.2f}\n"
 
+            nutri = self.get_nutrition_for_item(item['name'])
+            cal = nutri.get("cal", 0) * qty
+            p = nutri.get("p", 0) * qty
+            c = nutri.get("c", 0) * qty
+            f = nutri.get("f", 0) * qty
+            s = nutri.get("s", 0) * qty
+            if cal > 0 or s > 0:
+                receipt += f"[{cal} kcal | P: {p} g | C: {c} g | F: {f} g | S: {s} g]\n"
+
         receipt += f"--------------------------------------------\n"
         receipt += f"ยอดรวม (Subtotal):       {subtotal:>10,.2f}\n"
         receipt += f"ส่วนลด (Discount):        {discount:>10,.2f}\n"
         receipt += f"ภาษี 7% (VAT 7%):         {vat:>10,.2f}\n"
         receipt += f"ยอดสุทธิ (NET):            {net_total:>10,.2f}\n"
         receipt += f"--------------------------------------------\n"
-        receipt += f"📊 ข้อมูลโภชนาการมื้อนี้ (Nutrition Facts):\n"
-        receipt += f"🔥 แคลอรี่ (Calories):      {total_cal:>10} kcal\n"
-        receipt += f"🥩 โปรตีน (Protein):        {total_p:>10} g\n"
-        receipt += f"🍚 คาร์บ (Carbs):           {total_c:>10} g\n"
-        receipt += f"🥑 ไขมัน (Fat):             {total_f:>10} g\n"
-        receipt += f"🍬 น้ำตาล (Sugar):          {total_s:>10} g\n"
+        receipt += f"ข้อมูลโภชนาการมื้อนี้ (Nutrition Facts):\n"
+        receipt += f"แคลอรี่ (Calories):      {total_cal:>10} kcal\n"
+        receipt += f"โปรตีน (Protein):        {total_p:>10} g\n"
+        receipt += f"คาร์บ (Carbs):           {total_c:>10} g\n"
+        receipt += f"ไขมัน (Fat):             {total_f:>10} g\n"
+        receipt += f"น้ำตาล (Sugar):          {total_s:>10} g\n"
         receipt += f"============================================\n"
         word = ["ขอให้วันนี้เป็นวันที่ดี", "ขอบคุณที่ใช้บริการ", "ไว้แวะมาอุดหนุนใหม่นะคะ",
                 "เพราะกำลังใจที่มีค่า มาจากคุณลูกค้า", "ขอให้สุขภาพแข็งแรงและประสบความสำเร็จในทุกสิ่ง"]
@@ -695,7 +709,6 @@ class POS_system(QMainWindow):
 
     #new
     def get_nutrition_for_item(self, item_name):
-        # เพิ่มค่าน้ำตาล ("s") เข้ามาสำหรับเครื่องดื่มโดยเฉพาะ
         nutrition_db = {
             # --- Pasta ---
             "Seafood Drunk Pasta": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
@@ -725,7 +738,7 @@ class POS_system(QMainWindow):
             "Pork chop": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
             "Spicy Grilled": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
             "Chicken roll": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
-            # --- Drink (เน้นน้ำตาล "s" แทนคาร์บปกติ) ---
+            # --- Drink ---
             "Coke Glass": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
             "Coke Jug": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
             "Lemon Tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
