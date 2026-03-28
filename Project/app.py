@@ -1,5 +1,6 @@
 import sys
 import qrcode
+import csv
 import os
 import random
 from PySide6.QtCore import QSize
@@ -706,8 +707,39 @@ class POS_system(QMainWindow):
 
         print(f"พิมพ์ใบเสร็จสำเร็จ: {filename}")
 
+        #new--csv to streamlit
+        csv_filename = "daily_sales.csv"
+        file_exists = os.path.exists(csv_filename)
 
-    #new
+        with open(csv_filename, mode='a', newline='', encoding='utf-8-sig') as csv_file:
+            fieldnames = ['Date', 'Order_ID', 'Table_No', 'Menu_Name', 'Price_Per_Unit', 'Qty', 'Total_Price', 'Cal',
+                          'Protein', 'Carb', 'Fat', 'Sugar']
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+
+            if not file_exists:
+                writer.writeheader()
+
+            for item in cart_items:
+                nutri = self.get_nutrition_for_item(item['name'])
+                writer.writerow({
+                    'Date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    'Order_ID': order_no,
+                    'Table_No': table_no,
+                    'Menu_Name': item['name'].split('\n')[0].strip(),
+                    'Price_Per_Unit': item['price'],
+                    'Qty': item['qty'],
+                    'Total_Price': item['price'] * item['qty'],
+                    'Cal': nutri.get("cal", 0) * item['qty'],
+                    'Protein': nutri.get("p", 0) * item['qty'],
+                    'Carb': nutri.get("c", 0) * item['qty'],
+                    'Fat': nutri.get("f", 0) * item['qty'],
+                    'Sugar': nutri.get("s", 0) * item['qty']
+                })
+
+        print(f"บันทึกข้อมูลยอดขายลง {csv_filename} เรียบร้อยแล้ว!")
+
+
+    #new--menu nutrition facts
     def get_nutrition_for_item(self, item_name):
         nutrition_db = {
             # --- Steak ---
