@@ -682,7 +682,7 @@ class POS_system(QMainWindow):
             f = nutri.get("f", 0) * qty
             s = nutri.get("s", 0) * qty
             if cal > 0 or s > 0:
-                receipt += f"[{cal} kcal, P: {p} g, C: {c} g,\nF: {f} g, S: {s} g]\n"
+                receipt += f"/t[{cal} kcal, P: {p} g, C: {c} g,\nF: {f} g, S: {s} g]\n"
 
         receipt += f"--------------------------------------------\n"
         receipt += f"ยอดรวม (Subtotal):       {subtotal:>10,.2f}\n"
@@ -743,49 +743,55 @@ class POS_system(QMainWindow):
     def get_nutrition_for_item(self, item_name):
         nutrition_db = {
             # --- Steak ---
-            "Garlic pork": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
-            "Black pepper pork": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
-            "Pork chop": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
+            "Garlic Pork Steak": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
+            "Pepper Pork Steak": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
+            "Porkchop Steak": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
             "Spicy Grilled Chicken": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
-            "Teriyaki Chicken": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
-            "Chicken roll with ham and cheese": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
-            "Grilled fish": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
-            "Fried fish": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
+            "Teriyaki Chicken Steak": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
+            "Ham Cheese Chicken Roll": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
+            "Grilled Fish Steak": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
+            "Crispy Fish Steak": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
+
             # --- Burger ---
-            "Bacon Cheese": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
-            "Spicy Chicken": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
+            "Bacon Cheese Burger": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
+            "Spicy Chicken Burger": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
             "Fish Burger": {"cal": 450, "p": 20, "c": 45, "f": 20, "s": 0},
-            "Teriyaki Pork": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
+            "Teriyaki Pork Burger": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
+
             # --- Pasta ---
-            "Seafood Drunk Pasta": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
-            "Carbonara": {"cal": 650, "p": 20, "c": 60, "f": 35, "s": 0},
-            "Seafood Tom Yum": {"cal": 480, "p": 25, "c": 58, "f": 15, "s": 0},
+            "Spicy Seafood Spaghetti": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
+            "Carbonara Spaghetti": {"cal": 650, "p": 20, "c": 60, "f": 35, "s": 0},
+            "Seafood Tom Yum Spaghetti": {"cal": 480, "p": 25, "c": 58, "f": 15, "s": 0},
+
             # --- Salad ---
             "Tuna Salad": {"cal": 250, "p": 22, "c": 10, "f": 15, "s": 0},
             "Apple Salad": {"cal": 180, "p": 2, "c": 30, "f": 6, "s": 0},
-            "Fresh Vegetable Salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
+            "Fresh Veg Salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
+
             # --- Snack ---
             "French Fries": {"cal": 365, "p": 4, "c": 45, "f": 18, "s": 0},
-            "Cheese Bread": {"cal": 280, "p": 10, "c": 25, "f": 15, "s": 0},
-            "Mashed Potatoes": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
-            "Fried Onion": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
-            "Spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
+            "Cheese Toast": {"cal": 280, "p": 10, "c": 25, "f": 15, "s": 0},
+            "Mashed Potato": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
+            "Fried Onion Rings": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
+            "Cheesy Spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
+
             # --- Drink ---
-            "Coke Glass": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
-            "Coke Jug": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
-            "Lemon Tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
-            "Blue Hawaiian Soda": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
-            "Red Soda": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 29},
+            "Cup of Coca-Cola": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
+            "Jar of Coca-Cola": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
+            "Iced Lemon Tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
+            "Blue Hawaii Soda": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
+            "Red Lime Soda": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 29},
             "Passion Fruit Soda": {"cal": 130, "p": 0, "c": 0, "f": 0, "s": 30},
-            "Water": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0},
-            "Ice": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
+            "A Bottle of Water": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0},
+            "Cup of Ice": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
         }
 
-        #data cleaning
         clean_name = item_name.split('\n')[0].strip().lower()
+
         for key, data in nutrition_db.items():
-            if key.lower() in clean_name:
+            if key in clean_name:
                 return data
+
         return {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
 
 if __name__ == "__main__":
