@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
             MenuItem("Porkchop Steak", 169, "image/steak_pch.jpg", "steak", ["Energetic", "Comfort & Healing"], FoodNutrients(550, 35, 5, 40)),
             MenuItem("Spicy Grilled Chicken", 119, "image/steak_sgc.jpg", "steak", ["Spicy & Awake", "Energetic"], FoodNutrients(350, 35, 5, 18)),
             MenuItem("Teriyaki Chicken Steak", 119, "image/steak_tch.jpg", "steak", ["Energetic"], FoodNutrients(380, 35, 15, 20)),
-            MenuItem("Ham Chesse Chicken Roll", 139, "image/steak_crwhac.jpg", "steak", ["Comfort & Healing", "Energetic"], FoodNutrients(450, 30, 15, 25)),
+            MenuItem("Ham Cheese Chicken Roll", 139, "image/steak_crwhac.jpg", "steak", ["Comfort & Healing", "Energetic"], FoodNutrients(450, 30, 15, 25)),
             MenuItem("Grilled Fish Steak", 139, "image/steak_gf.jpg", "steak", ["Healthy & Light", "Energetic"], FoodNutrients(300, 30, 5, 15)),
             MenuItem("Crispy Fish Steak", 129, "image/steak_ff.jpg", "steak", ["Energetic", "Comfort & Healing"], FoodNutrients(500, 25, 35, 28)),
             # burger
@@ -536,7 +536,7 @@ class MainWindow(QMainWindow):
         if len(items) == 0:
             return
 
-        table_no = "5"
+        table_no = "4"
         cust_no = 1
 
         existing_order = self.db.get_unpaid_order(table_no)

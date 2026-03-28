@@ -743,47 +743,51 @@ class POS_system(QMainWindow):
     def get_nutrition_for_item(self, item_name):
         nutrition_db = {
             # --- Steak ---
-            "Garlic Pork Steak": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
-            "Pepper Pork Steak": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
-            "Porkchop Steak": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
-            "Spicy Grilled Chicken": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
-            "Teriyaki Chicken Steak": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
-            "Ham Cheese Chicken Roll": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
-            "Grilled Fish Steak": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
-            "Crispy Fish Steak": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
+            "garlic pork steak": {"cal": 520, "p": 35, "c": 5, "f": 38, "s": 0},
+            "pepper pork steak": {"cal": 500, "p": 35, "c": 5, "f": 35, "s": 0},
+            "porkchop steak": {"cal": 550, "p": 35, "c": 5, "f": 40, "s": 0},
+            "spicy grilled chicken": {"cal": 350, "p": 35, "c": 5, "f": 18, "s": 0},
+            "teriyaki chicken steak": {"cal": 380, "p": 35, "c": 15, "f": 20, "s": 0},
+            "ham cheese chicken roll": {"cal": 450, "p": 30, "c": 15, "f": 25, "s": 0},
+            "grilled fish steak": {"cal": 300, "p": 30, "c": 5, "f": 15, "s": 0},
+            "crispy fish steak": {"cal": 500, "p": 25, "c": 35, "f": 28, "s": 0},
 
             # --- Burger ---
-            "Bacon Cheese Burger": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
-            "Spicy Chicken Burger": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
-            "Fish Burger": {"cal": 450, "p": 20, "c": 45, "f": 20, "s": 0},
-            "Teriyaki Pork Burger": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
+            "bacon cheese burger": {"cal": 680, "p": 35, "c": 45, "f": 40, "s": 0},
+            "spicy chicken burger": {"cal": 520, "p": 25, "c": 48, "f": 25, "s": 0},
+            "fish burger": {"cal": 450, "p": 20, "c": 45, "f": 20, "s": 0},
+            "teriyaki pork burger": {"cal": 550, "p": 28, "c": 50, "f": 25, "s": 0},
 
             # --- Pasta ---
-            "Spicy Seafood Spaghetti": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
-            "Carbonara Spaghetti": {"cal": 650, "p": 20, "c": 60, "f": 35, "s": 0},
-            "Seafood Tom Yum Spaghetti": {"cal": 480, "p": 25, "c": 58, "f": 15, "s": 0},
+            "spicy seafood spaghetti": {"cal": 450, "p": 25, "c": 55, "f": 12, "s": 0},
+            "carbonara spaghetti": {"cal": 650, "p": 20, "c": 60, "f": 35, "s": 0},
+            "seafood tom yum spaghetti": {"cal": 480, "p": 25, "c": 58, "f": 15, "s": 0},
+
 
             # --- Salad ---
-            "Tuna Salad": {"cal": 250, "p": 22, "c": 10, "f": 15, "s": 0},
-            "Apple Salad": {"cal": 180, "p": 2, "c": 30, "f": 6, "s": 0},
-            "Fresh Veg Salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
+            "tuna salad": {"cal": 250, "p": 22, "c": 10, "f": 15, "s": 0},
+            "apple salad": {"cal": 180, "p": 2, "c": 30, "f": 6, "s": 0},
+            "fresh veg salad": {"cal": 120, "p": 3, "c": 15, "f": 5, "s": 0},
+
 
             # --- Snack ---
-            "French Fries": {"cal": 365, "p": 4, "c": 45, "f": 18, "s": 0},
-            "Cheese Toast": {"cal": 280, "p": 10, "c": 25, "f": 15, "s": 0},
-            "Mashed Potato": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
-            "Fried Onion Rings": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
-            "Cheesy Spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
+            "french fries": {"cal": 365, "p": 4, "c": 45, "f": 18, "s": 0},
+            "cheese toast": {"cal": 280, "p": 10, "c": 25, "f": 15, "s": 0},
+            "mashed potato": {"cal": 220, "p": 4, "c": 30, "f": 10, "s": 0},
+            "fried onion rings": {"cal": 400, "p": 5, "c": 45, "f": 22, "s": 0},
+            "cheesy spinach": {"cal": 320, "p": 12, "c": 10, "f": 25, "s": 0},
+
 
             # --- Drink ---
-            "Cup of Coca-Cola": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
-            "Jar of Coca-Cola": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
-            "Iced Lemon Tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
-            "Blue Hawaii Soda": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
-            "Red Lime Soda": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 29},
-            "Passion Fruit Soda": {"cal": 130, "p": 0, "c": 0, "f": 0, "s": 30},
-            "A Bottle of Water": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0},
-            "Cup of Ice": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
+            "cup of coca-cola": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 39},
+            "jar of coca-cola": {"cal": 420, "p": 0, "c": 0, "f": 0, "s": 117},
+            "iced lemon tea": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 28},
+            "blue hawaii soda": {"cal": 140, "p": 0, "c": 0, "f": 0, "s": 32},
+            "red lime soda": {"cal": 120, "p": 0, "c": 0, "f": 0, "s": 29},
+            "passion fruit soda": {"cal": 130, "p": 0, "c": 0, "f": 0, "s": 30},
+            "a bottle of water": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0},
+            "cup of ice": {"cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
+
         }
 
         clean_name = item_name.split('\n')[0].strip().lower()

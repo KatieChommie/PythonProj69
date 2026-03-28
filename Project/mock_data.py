@@ -47,7 +47,7 @@ menu_mock = [
     {"name": "Ice", "price": 5, "cal": 0, "p": 0, "c": 0, "f": 0, "s": 0}
 ]
 
-csv_filename = "daily_sales.csv"
+csv_filename = "daily_sales_mock.csv"
 
 with open(csv_filename, mode='a', newline='', encoding='utf-8-sig') as csv_file:
     fieldnames = ['Date', 'Order_ID', 'Table_No', 'Menu_Name', 'Price_Per_Unit', 'Qty', 'Total_Price', 'Cal', 'Protein',
@@ -70,7 +70,7 @@ with open(csv_filename, mode='a', newline='', encoding='utf-8-sig') as csv_file:
         qty = random.randint(1, 3)
 
         order_no = f"INV-{random_time.strftime('%Y%m%d-%H%M%S')}"
-        table_no = str(random.randint(1, 10))
+        table_no = str(random.randint(1, 8))
 
         writer.writerow({
             'Date': random_time.strftime("%Y-%m-%d %H:%M:%S"),
