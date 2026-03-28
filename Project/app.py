@@ -682,7 +682,7 @@ class POS_system(QMainWindow):
             f = nutri.get("f", 0) * qty
             s = nutri.get("s", 0) * qty
             if cal > 0 or s > 0:
-                receipt += f"/t[{cal} kcal, P: {p} g, C: {c} g,\nF: {f} g, S: {s} g]\n"
+                receipt += f"   [{cal} kcal, P: {p} g, C: {c} g,\n    F: {f} g, S: {s} g]\n"
 
         receipt += f"--------------------------------------------\n"
         receipt += f"ยอดรวม (Subtotal):       {subtotal:>10,.2f}\n"
