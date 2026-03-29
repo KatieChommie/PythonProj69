@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+#read csv (created from app.py)
 df = pd.read_csv("daily_sales.csv")
 
 st.title("Restaurant Sales Dashboard 📊")
