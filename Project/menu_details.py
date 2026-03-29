@@ -1,21 +1,27 @@
-
-class FoodNutrients:
-    def __init__(self, cal: int = 0, protein: int = 0, carbs: int = 0, fat: int = 0):
+class Nutrients:
+    def __init__(self, cal: int = 0):
         self.cal = cal
+
+    def get_info_string(self):
+        return f"Calories: {self.cal} kcal"
+
+class FoodNutrients(Nutrients):
+    def __init__(self, cal: int = 0, protein: int = 0, carbs: int = 0, fat: int = 0):
+        super().__init__(cal)
         self.protein = protein
         self.carbs = carbs
         self.fat = fat
 
     def get_info_string(self):
-        return f"Calories: {self.cal} kcal (Protein: {self.protein}g Carbs: {self.carbs}g Fats: {self.fat}g)"
+        return f"{super().get_info_string()} (Protein: {self.protein}g Carbs: {self.carbs}g Fats: {self.fat}g)"
 
-class DrinkNutrients:
+class DrinkNutrients(Nutrients):
     def __init__(self, cal: int = 0, sugar: int = 0):
-        self.cal = cal
+        super().__init__(cal)
         self.sugar = sugar
 
     def get_info_string(self):
-        return f"Calories: {self.cal} kcal (Sugar: {self.sugar}g)"
+        return f"{super().get_info_string()} (Sugar: {self.sugar}g)"
 
 class MenuItem:
     def __init__(self, name: str, price: float, image: str, category: str, mood: list = None, nutrients=None):
